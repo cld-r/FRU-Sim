@@ -1,6 +1,6 @@
 # FRU-Sim
 
-This is a solo/offline sim for FRU.
+This is a solo/offline sim for FRU, currently in development.
 
 If you have any questions, feel free to join us on [Discord](https://discord.gg/P9adFHADrX).
 
