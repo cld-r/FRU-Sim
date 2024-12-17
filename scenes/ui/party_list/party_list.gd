@@ -92,6 +92,14 @@ func remove_debuff(role_key : String, debuff_name : String) -> void:
 				player_debuff.queue_free()
 
 
+func has_debuff(role_key : String, debuff_name : String) -> bool:
+	var auras : Array = aura_containers[role_key].get_children()
+	for aura : Node in auras:
+		if aura is Debuff and aura.debuff_name == debuff_name:
+			return true
+	return false
+
+
 func get_debuff_stacks(role_key : String, debuff_name : String) -> int:
 	var auras : Array = aura_containers[role_key].get_children()
 	for aura : Node in auras:

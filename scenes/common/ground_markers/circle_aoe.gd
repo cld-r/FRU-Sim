@@ -7,7 +7,7 @@ extends GroundMarker
 class_name CircleAoe
 
 signal circle_body_entered(body: CharacterBody3D, circle: CircleAoe)
-
+signal circle_area_entered(area: Area3D, spell_name: String)
 var _radius: float
 
 func set_parameters(new_position: Vector3, radius: float, lifetime: float,
@@ -48,3 +48,7 @@ func play_start_animation() -> void:
 
 func _on_body_entered(body: CharacterBody3D) -> void:
 	circle_body_entered.emit(body, self)
+
+
+func _on_area_entered(area: Area3D) -> void:
+	circle_area_entered.emit(area, spell_name)

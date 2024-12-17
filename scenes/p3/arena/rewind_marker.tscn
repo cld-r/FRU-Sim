@@ -1,4 +1,6 @@
-[gd_scene load_steps=5 format=3 uid="uid://bbt3gcdnjyro5"]
+[gd_scene load_steps=7 format=3 uid="uid://bbt3gcdnjyro5"]
+
+[ext_resource type="Script" path="res://scenes/p3/arena/rewind_marker.gd" id="1_4pga4"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7sau8"]
 transparency = 1
@@ -22,8 +24,13 @@ rim_tint = 1.0
 material = SubResource("StandardMaterial3D_j5ipv")
 size = Vector3(1.281, 1.29, 0.189)
 
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_cva8n"]
+resource_local_to_scene = true
+height = 4.76
+radius = 2.5
+
 [node name="RewindMarker" type="Node3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.7078, 0, -10.4331)
+script = ExtResource("1_4pga4")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("CylinderMesh_iy5y0")
@@ -35,3 +42,10 @@ mesh = SubResource("PrismMesh_v57a5")
 [node name="Arrow2" type="MeshInstance3D" parent="."]
 transform = Transform3D(-4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, -0.654106, 2.92627, 0)
 mesh = SubResource("PrismMesh_v57a5")
+
+[node name="Area3D" type="Area3D" parent="."]
+collision_layer = 1024
+collision_mask = 1024
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+shape = SubResource("CylinderShape3D_cva8n")

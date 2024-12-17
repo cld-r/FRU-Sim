@@ -1,0 +1,27 @@
+[gd_scene load_steps=2 format=3 uid="uid://ce72svh5khi1u"]
+
+[ext_resource type="Script" path="res://scenes/ui/sequence_select_button.gd" id="1_hfr61"]
+
+[node name="SequenceSelectButton" type="OptionButton"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -197.0
+offset_top = 21.0
+offset_right = -21.0
+offset_bottom = 52.0
+grow_horizontal = 0
+focus_mode = 0
+action_mode = 1
+button_mask = 3
+selected = 1
+fit_to_longest_item = false
+item_count = 3
+popup/item_0/text = "Light Rampant"
+popup/item_1/text = "Ultimate Relativity"
+popup/item_1/id = 1
+popup/item_2/text = "Crystallize Time"
+popup/item_2/id = 2
+script = ExtResource("1_hfr61")
+
+[connection signal="item_selected" from="." to="." method="_on_item_selected"]

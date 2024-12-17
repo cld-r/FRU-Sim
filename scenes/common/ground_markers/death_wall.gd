@@ -11,5 +11,4 @@ extends Node3D
 
 func _on_deathwall_trigger_body_exited(body: CharacterBody3D) -> void:
 	if is_instance_valid(body):
-		pass
-		#fail_list.add_fail("%s hit deathwall." % body.name)
+		fail_list.add_fail("%s hit deathwall." % body.name)

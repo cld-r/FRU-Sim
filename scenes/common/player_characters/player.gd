@@ -15,7 +15,7 @@ var debug := false
 #@export var player_scale : float = 1.25
 #@export var model_scene : PackedScene
 
-@onready var player_movement_controller: Node = %PlayerMovementController
+@onready var player_movement_controller: PlayerMovementController = %PlayerMovementController
 @onready var camera : Camera3D = %Camera3D
 
 
@@ -26,8 +26,6 @@ var debug := false
 	#model.scale = Vector3.ONE * model_scale
 	#anim_tree = model.get_node("AnimationTree")
 	#anim_state = model.get_node("AnimationTree").get("parameters/playback")
-
-
 
 
 func set_parameters(new_role_key : String, new_model_scene : PackedScene, 
@@ -57,6 +55,8 @@ func handle_left_click(mouse_pos: Vector2) -> void:
 	target_changed.emit(collider)
 
 
+func reset_movement():
+	player_movement_controller.reset_player_movement()
 
 #func move_to(vec2 : Vector2) -> void:
 	#if debug:
@@ -81,6 +81,7 @@ func get_camera() -> Camera3D:
 
 func freeze_player() -> void:
 	player_movement_controller.is_frozen = true
+	anim_tree.set("parameters/conditions/idle", true)
 
 
 func unfreeze_player() -> void:
@@ -103,3 +104,7 @@ func arms_length() -> void:
 # TODO: Add debuff
 func sprint() -> void:
 	player_movement_controller.sprint()
+
+
+func is_player_frozen() -> bool:
+	return player_movement_controller.is_frozen

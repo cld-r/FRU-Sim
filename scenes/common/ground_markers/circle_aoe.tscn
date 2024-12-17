@@ -82,7 +82,7 @@ _data = {
 }
 
 [node name="CircleAoE" type="Area3D"]
-collision_layer = 0
+collision_layer = 512
 collision_mask = 4
 script = ExtResource("1_78a5h")
 
@@ -97,4 +97,5 @@ libraries = {
 "": SubResource("AnimationLibrary_bk3tn")
 }
 
+[connection signal="area_entered" from="." to="." method="_on_area_entered"]
 [connection signal="body_entered" from="." to="." method="_on_body_entered"]

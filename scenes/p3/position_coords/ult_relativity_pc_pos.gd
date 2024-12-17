@@ -2,11 +2,11 @@ extends Node
 
 class_name UltRelativityPcPos
 
-const OUT_DISTANCE := 32.5
-const OUT_INTER := 23.27
-const MID_DISTANCE := 20.5
+const OUT_DISTANCE := 32.5  # Fire drop distance
+const OUT_INTER := 23.27 
+const MID_DISTANCE := 20.5  # Rewind drop
 const MID_INTER := 14.5
-const IN_DISTANCE := 3.0
+const IN_DISTANCE := 3.0    # Middle baits/stacks
 const IN_INTER := 2.1
 
 const BAIT_X_CARD := 23
