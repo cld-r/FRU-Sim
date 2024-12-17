@@ -66,7 +66,7 @@ const AKH_MORN_LIGHT_COLOR := Color.GOLD
 const AKH_MORN_DARK_COLOR := Color.DARK_VIOLET
 
 
-const NA_WE_PRIO := ["t1", "t2", "h1", "h2", "m1", "m2", "r1", "r2"]
+const NA_WE_PRIO := ["h2", "h1", "t2", "t1", "m1", "m2", "r1", "r2"]
 const DEBUFF_ASSIGNMENTS := {
 	"r_aero_sw": {AERO_ICON: 14, WYRMCLAW_ICON: 40, RETURN_ICON: 33},
 	"r_aero_se": {AERO_ICON: 14, WYRMCLAW_ICON: 40, RETURN_ICON: 33},

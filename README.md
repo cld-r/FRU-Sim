@@ -1,6 +1,6 @@
 # FRU-Sim
 
-This is a solo/offline sim for FRU, currently in development.
+This is a solo/offline sim for FRU. It is currently in development and has modules for Light Rampant, Ultimate Relativity and Crystallize Time.
 
 If you have any questions, feel free to join us on [Discord](https://discord.gg/P9adFHADrX).
 
