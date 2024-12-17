@@ -7,6 +7,8 @@
 
 extends Node
 
+class_name PlayerMovementController
+
 const MAX_MOUSE_CLICK_MOVEMENT := 3000.0
 
 var debug := false
@@ -87,7 +89,7 @@ func _physics_process(delta : float) -> void:
 	if not player.is_on_floor():
 		player.velocity.y -= gravity * delta
 	
-	if is_frozen or spectate_mode:
+	if is_frozen or spectate_mode or player.sliding:
 		return
 	
 	# 3D Movement (camera relative).
@@ -233,7 +235,13 @@ func _unhandled_input(event : InputEvent) -> void:
 			SavedVariables.save_data["settings"]["camera_distance"] = camera_distance
 
 
+func reset_player_movement():
+	player.anim_tree.set("parameters/conditions/grounded", true)
+	player.anim_tree.set("parameters/conditions/idle", true)
+
+
 func dash() -> void:
+	reset_player_movement()
 	var tar : Vector3 = (twist_pivot.global_transform.basis.z.normalized() * -dash_distance) 
 	tar += player.global_position
 	var tween : Tween = get_tree().create_tween()

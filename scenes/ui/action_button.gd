@@ -34,7 +34,8 @@ func set_keybind_label(key: String) -> void:
 
 
 func _on_pressed() -> void:
-	if disabled:
+	# TODO: Wrongly assumes player is stunned if frozen.
+	if disabled or get_tree().get_first_node_in_group("player").is_player_frozen():
 		return
 	disabled = true
 	set_process(true)

@@ -7,6 +7,7 @@
 ### General:
 	- Improve Waymark visuals.
 	- Add Nameplates.
+	- Add more movement abilities.
 
 ### UI:
 	- Add Moveable UI elements.
@@ -31,6 +32,8 @@
 
 ### P3:
 	- Add delay in fires moving out to avoid clipping lasers.
+	- Fix laser hitbox for jumping.
+	- Force free player after slide (player getting stuck).
 
 ### Non-critical:
 	- Scrolling damage text.

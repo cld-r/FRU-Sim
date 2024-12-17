@@ -7,6 +7,7 @@ extends Area3D
 class_name GroundMarker
 
 signal collision_ready
+signal collisions_checked(bodies: Array)
 
 const COLOR_ALPHA = 0.75
 
@@ -55,6 +56,7 @@ func on_collision_ready() -> void:
 	if debug:
 		print("Bodies hit: ", bodies)
 	check_fail()
+	collisions_checked.emit(bodies)
 
 
 func donut_collision_check() -> void:

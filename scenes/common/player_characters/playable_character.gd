@@ -50,6 +50,10 @@ func get_debuff_stacks(debuff_name: String) -> int:
 	return party_list.get_debuff_stacks(role_key, debuff_name)
 
 
+func has_debuff(debuff_name: String) -> bool:
+	return party_list.has_debuff(role_key, debuff_name)
+
+
 func get_model_rotation() -> Vector3:
 	return self.model.rotation
 
@@ -58,22 +62,51 @@ func get_role() -> String:
 	return self.role_key
 
 
-func knockback(distance : float, source : Vector2) -> void:
+# This is for bot movement.
+# Player movement reset is handled in PlayerMovementController
+func reset_movement() -> void:
+	anim_tree.set("parameters/conditions/idle", true)
+
+
+func knockback(distance : float, source : Vector2, time: float = 0.5) -> void:
 	if kb_resist:
 		return
+	reset_movement()
+	sliding = true
 	var target_v2 : Vector2 = source.direction_to(v2(global_position))
 	target_v2 = (target_v2 * distance) + v2(global_position)
 	var tween : Tween = get_tree().create_tween()
 	tween.tween_property(self, "global_position",
-		Vector3(target_v2.x, 0, target_v2.y), 0.5)\
+		Vector3(target_v2.x, 0, target_v2.y), time)\
 		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	await tween.finished
+	sliding = false
+	
 
 
 func slide(slide_target: Vector2, time: float = 0.3) -> void:
+	reset_movement()
+	sliding = true
 	var tween : Tween = get_tree().create_tween()
 	tween.tween_property(self, "global_position",
 		Vector3(slide_target.x, 0, slide_target.y), time)\
 		.set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_IN_OUT)
+	await tween.finished
+	sliding = false
+
+
+# Slide with easing that more resembles a knockback
+func kb_slide(slide_target: Vector2, time: float = 0.3) -> void:
+	if kb_resist:
+		return
+	reset_movement()
+	sliding = true
+	var tween : Tween = get_tree().create_tween()
+	tween.tween_property(self, "global_position",
+		Vector3(slide_target.x, 0, slide_target.y), time)\
+		.set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT)
+	await tween.finished
+	sliding = false
 
 
 func set_active_target() -> void:
