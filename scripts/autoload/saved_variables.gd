@@ -37,7 +37,8 @@ var save_data: Dictionary = {
 		"x_sens": 1.0,
 		"y_sens": 1.0,
 		"invert_y": false,
-		"selected_seq": 1
+		"selected_seq": 0,
+		"p3_ur_strat": 0   # [NAUR, LPDU]
 	},
 	"keybinds": {
 		"ab1_sprint": KEY_1,
