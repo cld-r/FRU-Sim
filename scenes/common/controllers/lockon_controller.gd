@@ -16,7 +16,8 @@ extends Node
 class_name LockonController
 
 enum {PS_CROSS, PS_CIRCLE, PS_SQUARE, PS_TRIANGLE,
-	DEFAM, DIVEBOMB, DOOM, LC_1, LC_2, LC_3, LR_ORB, SPREAD_MARKER, GAZE}
+	DEFAM, DIVEBOMB, DOOM, LC_1, LC_2, LC_3, LR_ORB,
+	SPREAD_MARKER, GAZE, STACK_MARKER}
 
 var res_paths := {
 	PS_CROSS: "res://scenes/common/player_characters/lockon/playstation/ps_cross.tscn",
@@ -31,12 +32,13 @@ var res_paths := {
 	LC_3: "res://scenes/common/player_characters/lockon/limit_cut/lc_3.tscn",
 	LR_ORB: "res://scenes/p2/lockon/lr_light_orb.tscn",
 	SPREAD_MARKER: "res://scenes/p2/lockon/spread_marker.tscn",
-	GAZE: "res://scenes/common/player_characters/lockon/gaze.tscn"
+	GAZE: "res://scenes/common/player_characters/lockon/gaze.tscn",
+	STACK_MARKER: "res://scenes/common/player_characters/lockon/stack_marker.tscn"
 }
 var meta_ids := {
 	PS_CROSS: 0, PS_CIRCLE: 1, PS_SQUARE: 2, PS_TRIANGLE: 3,
 	DEFAM: 4, DIVEBOMB: 5, DOOM: 6, LC_1: 7, LC_2: 8, LC_3: 9, 
-	LR_ORB: 10, SPREAD_MARKER: 11, GAZE: 12
+	LR_ORB: 10, SPREAD_MARKER: 11, GAZE: 12, STACK_MARKER: 13
 }
 
 var lockon_node_path := "Lockon"

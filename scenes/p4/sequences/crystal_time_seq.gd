@@ -284,6 +284,9 @@ func fireworks():
 		ICE_RADIUS_INNER, ICE_RADIUS_OUTTER, ICE_LIFETIME, ICE_COLOR, [0, 0, "Dark Blizzard III"])
 	ground_aoe_controller.spawn_donut(v2(get_char("b_ice").global_position),
 		ICE_RADIUS_INNER, ICE_RADIUS_OUTTER, ICE_LIFETIME, ICE_COLOR, [0, 0, "Dark Blizzard III"])
+	# Eruption hits
+	ground_aoe_controller.spawn_circle(v2(get_char("b_erupt").global_position), ERUPTION_RADIUS,
+		ERUPTION_LIFETIME, ERUPTION_COLOR, [1, 1, "Dark Eruption", [get_char("b_erupt")]])
 
 func on_aero_1_collisions(bodies: Array):
 	for body in bodies:
@@ -764,7 +767,7 @@ func instantiate_party(new_party: Dictionary) -> void:
 	# Pick Usurper Jump target
 	jump_target = party_ct.keys().pick_random()
 	# Randomize Exaline spawns
-	exaline_spawns = randi_range(0, 3)
+	exaline_spawns = randi_range(0, 3) as Intercards
 	east_exa = (exaline_spawns == Intercards.NE or exaline_spawns == Intercards.SE)
 	north_exa = (exaline_spawns == Intercards.NE or exaline_spawns == Intercards.NW)
 
@@ -844,9 +847,9 @@ func _on_area_3d_area_entered(area: Area3D) -> void:
 		fail_list.add_fail("Fragment of Fate was hit by %s." % area.spell_name)
 
 
-func v2(v3: Vector3) -> Vector2:
-	return Vector2(v3.x, v3.z)
+func v2(vec3: Vector3) -> Vector2:
+	return Vector2(vec3.x, vec3.z)
 
 
-func v3(v2: Vector2) -> Vector3:
-	return Vector3(v2.x, 0, v2.y)
+func v3(vec2: Vector2) -> Vector3:
+	return Vector3(vec2.x, 0, vec2.y)
