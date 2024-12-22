@@ -9,6 +9,7 @@ extends CanvasLayer
 @onready var arms_action_button: ActionButton = $MarginContainer/ButtonsContainer/ArmsActionButton
 @onready var dash_action_button: ActionButton = $MarginContainer/ButtonsContainer/DashActionButton
 @onready var parent_node: Sequence = $".."
+@onready var control_menu: CanvasLayer = %ControlMenu
 
 var player: Player
 var keybinds: Dictionary
@@ -28,6 +29,8 @@ func _ready() -> void:
 
 
 func _unhandled_input(event : InputEvent) -> void:
+	if control_menu.visible:
+		return
 	if event is InputEventKey:
 		var keycode : int = event.get_keycode_with_modifiers()
 		if keycode == keybinds["ab1_sprint"]:

@@ -11,6 +11,10 @@ class_name PlayerMovementController
 
 const MAX_MOUSE_CLICK_MOVEMENT := 3000.0
 
+const BASE_MOUSE_SENS := 0.002
+const BASE_X_SENS := 0.027
+const BASE_Y_SENS := 0.027
+
 var debug := false
 @export var move_speed : float = 14.3
 @export var acceleration : float = 20.0
@@ -27,15 +31,15 @@ var debug := false
 var facing_angle : float  # do we use this anywhere?
 var rotation_speed := 0.15
 var click_rotation_speed := 0.3
-var mouse_sensitivity := 0.002
+var mouse_sensitivity := BASE_MOUSE_SENS
 var twist_input := 0.0
 var pitch_input := 0.0
 var mouse_position := Vector2(950.0, 480.0)
 var mouse_travel := Vector2.ZERO
-# Controls
+# Controller
 var invert_y := false
-var x_sensitivity := 0.027
-var y_sensitivity := 0.027
+var x_sensitivity := BASE_X_SENS
+var y_sensitivity := BASE_Y_SENS
 # Movement
 var rotation_offset := 0.0
 var target_rotation := 0.0
@@ -67,6 +71,7 @@ func _ready() -> void:
 	invert_y = SavedVariables.save_data["settings"]["invert_y"]
 	spectate_mode = Global.spectate_mode
 	GameEvents.spectate_mode_changed.connect(on_spectate_mode_changed)
+	GameEvents.variable_saved.connect(on_variable_saved)
 
 
 func _physics_process(delta : float) -> void:
@@ -278,6 +283,15 @@ func sprint() -> void:
 func on_spectate_mode_changed() -> void:
 	spectate_mode = Global.spectate_mode
 	#reset_camera()
+
+
+# Used to update sensitivity when changed in controls menu.
+func on_variable_saved(section: String, key: String, value: Variant) -> void:
+	if key.contains("sens") or key == "invert_y":
+		mouse_sensitivity = BASE_MOUSE_SENS * SavedVariables.save_data["settings"]["mouse_sens"]
+		x_sensitivity = BASE_Y_SENS * SavedVariables.save_data["settings"]["x_sens"]
+		y_sensitivity = BASE_Y_SENS * SavedVariables.save_data["settings"]["y_sens"]
+		invert_y = SavedVariables.save_data["settings"]["invert_y"]
 
 
 # Resets camera position to fix it getting desync'd when leaving spectate mode.

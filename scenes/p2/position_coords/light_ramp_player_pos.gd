@@ -1,6 +1,6 @@
 extends Node
 
-class_name LightRampPlayerPos
+class_name LRPosNA
 
 
 # Pre-pos for 4/4 setup

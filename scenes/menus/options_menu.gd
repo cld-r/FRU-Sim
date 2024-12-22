@@ -38,4 +38,3 @@ func _on_keybinds_button_pressed() -> void:
 func _on_doth_lineup_button_pressed() -> void:
 	self.hide()
 	lineup_menu_container.show()
-

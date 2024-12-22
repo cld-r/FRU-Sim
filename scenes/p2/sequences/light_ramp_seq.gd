@@ -5,6 +5,8 @@
 
 extends Node
 
+enum Strat {NA, EU}
+
 # Debuff Icon Scenes
 const CHAINS_LOCKED = preload("res://scenes/ui/auras/debuff_icons/p2/chains_locked.tscn")
 const CHAINS = preload("res://scenes/ui/auras/debuff_icons/p2/chains.tscn")
@@ -65,7 +67,8 @@ var lr_north_lineup := ["t2", "t1", "h2", "h1"]
 var lr_south_lineup := ["r1", "r2", "m1", "m2"]
 var orb_keys := []
 var spread_keys := []
-var spread_ns_prio := [3, 4, 2, 5, 1, 6, 0, 7] # W > E Prio [h1, r1, h2, r2, t1, m1, t2, m2]
+var na_we_spread_prio := [4, 3, 5, 2, 6, 1, 7, 0] # W > E Prio [r1, h1, r2, h2, m1, t1, m2, t2]
+var eu_ns_spread_prio := [3, 2, 1, 0, 4, 5, 6, 7] # N > S Prio [h1, h2, t1, t2, r1, r2, m1, m2]
 # Will be randomized. First 4 get 1 stacks of debuff, last 4 are quad tower soakers.
 var lightsteeped_keys := ["t2", "t1", "h2", "h1", "r1", "r2", "m1", "m2"]
 var solo_tower_positions := [Vector2(19, -32.8), Vector2(37.7, 0), Vector2(19, 32.8),
@@ -75,6 +78,7 @@ var solo_towers := []
 var middle_tower: LRTower
 var n_orb_pattern: bool
 var halo_spread_pattern: bool
+var strat: Strat
 
 
 func start_sequence(new_party: Dictionary) -> void:
@@ -82,6 +86,11 @@ func start_sequence(new_party: Dictionary) -> void:
 	ground_aoe_controller.preload_aoe(["lr_tower", "circle", "cone"])
 	lockon_controller.pre_load([10, 11])
 	lr_chains_controller.preload_resources()
+	strat = SavedVariables.save_data["settings"]["p2_lr_strat"]
+	if strat >= Strat.size():
+		push_warning("Invalid strat selected. Defaulting to NA.")
+		GameEvents.emit_variable_saved("settings", "p2_lr_strat", 0)
+		strat = Strat.NA
 	instantiate_party(new_party)
 	light_ramp_anim.play("light_ramp")
 
@@ -98,7 +107,7 @@ func cast_lr() -> void:
 
 
 func move_pre_pos() -> void:
-	move_party(party, LightRampPlayerPos.pre_pos_44)
+	move_party(party, LRPosNA.pre_pos_44)
 
 ## 08.00
 # Finish cast animation.
@@ -134,13 +143,20 @@ func assing_debuffs() -> void:
 ## 09.75
 # Spread markers move.
 func move_puddles_tower_lineup() -> void:
-	party[lr_party["n_puddle"]].move_to(LightRampPlayerPos.tower_lineup["n_puddle"])
-	party[lr_party["s_puddle"]].move_to(LightRampPlayerPos.tower_lineup["s_puddle"])
+	if strat == Strat.NA:
+		party[lr_party["n_puddle"]].move_to(LRPosNA.tower_lineup["n_puddle"])
+		party[lr_party["s_puddle"]].move_to(LRPosNA.tower_lineup["s_puddle"])
+	else: 
+		party[lr_party["n_puddle"]].move_to(LRPosEU.tower_lineup["n_puddle"])
+		party[lr_party["s_puddle"]].move_to(LRPosEU.tower_lineup["s_puddle"])
 
 ## 10.75
 # Chains first move.
 func move_tower_lineup() -> void:
-	move_lr_party(LightRampPlayerPos.tower_lineup)
+	if strat == Strat.NA:
+		move_lr_party(LRPosNA.tower_lineup)
+	else:
+		move_lr_party(LRPosEU.tower_lineup)
 
 ## 11.00
 # Solo towers spawn
@@ -152,11 +168,13 @@ func spawn_solo_towers() -> void:
 	shiva.visible = false
 
 
-## 14.75
+## 12.75
 # Chains move to towers.
 func move_tower_soak():
-	move_lr_party(LightRampPlayerPos.tower_soak)
-
+	if strat == Strat.NA:
+		move_lr_party(LRPosNA.tower_soak)
+	else:
+		move_lr_party(LRPosEU.tower_soak)
 
 ## 15.60
 # First puddle snapshot (fades after 11s)
@@ -172,21 +190,30 @@ func first_puddle_snapshot() -> void:
 	# Spawn first AoE
 	drop_puddles()
 	# Move spread players
-	move_lr_party(LightRampPlayerPos.puddle_dodge_1)
+	if strat == Strat.NA:
+		move_lr_party(LRPosNA.puddle_dodge_1)
+	else:
+		move_lr_party(LRPosEU.puddle_dodge_1)
 
 
 ## 17.20
 # Second puddle snapshot
 func second_puddle_snapshot() -> void:
 	drop_puddles()
-	move_lr_party(LightRampPlayerPos.puddle_dodge_2)
+	if strat == Strat.NA:
+		move_lr_party(LRPosNA.puddle_dodge_2)
+	else:
+		move_lr_party(LRPosEU.puddle_dodge_2)
 
 
 ## 18.80
 # Third puddle snapshot
 func third_puddle_snapshot() -> void:
 	drop_puddles()
-	move_lr_party(LightRampPlayerPos.puddle_dodge_3)
+	if strat == Strat.NA:
+		move_lr_party(LRPosNA.puddle_dodge_3)
+	else:
+		move_lr_party(LRPosEU.puddle_dodge_3)
 
 
 ## 19.00
@@ -209,7 +236,10 @@ func towers_snapshot() -> void:
 # Move soakers to N/S
 # Spawn first orb trio
 func move_post_tower() -> void:
-	move_lr_party(LightRampPlayerPos.post_tower)
+	if strat == Strat.NA:
+		move_lr_party(LRPosNA.post_tower)
+	else:
+		move_lr_party(LRPosEU.post_tower)
 	first_orbs_spawn()
 
 
@@ -228,7 +258,10 @@ func first_orbs_spawn () -> void:
 # Forth puddle snapshot
 func forth_puddle_snapshot() -> void:
 	drop_puddles()
-	move_lr_party(LightRampPlayerPos.puddle_dodge_4)
+	if strat == Strat.NA:
+		move_lr_party(LRPosNA.puddle_dodge_4)
+	else:
+		move_lr_party(LRPosEU.puddle_dodge_4)
 
 
 ## 22.00 
@@ -236,7 +269,10 @@ func forth_puddle_snapshot() -> void:
 # First orb telegraph (grow in)
 func fifth_puddle_snapshot() -> void:
 	drop_puddles()
-	move_lr_party(LightRampPlayerPos.puddle_dodge_5)
+	if strat == Strat.NA:
+		move_lr_party(LRPosNA.puddle_dodge_5)
+	else:
+		move_lr_party(LRPosEU.puddle_dodge_5)
 	first_orbs_telegraph()
 
 
@@ -264,16 +300,27 @@ func second_orbs_spawn () -> void:
 
 # Intermediate dodge to simulate slower movement leading up to shared hit
 func move_to_intermediate_spot() -> void:
-	move_lr_party(LightRampPlayerPos.inter_dodge)
+	if strat == Strat.NA:
+		move_lr_party(LRPosNA.inter_dodge)
+	else:
+		move_lr_party(LRPosEU.inter_dodge)
+	
 
 
 ## 24.50
 # Move groups to first safe spot
 func move_safe_spot_1() -> void:
-	if n_orb_pattern:
-		move_lr_party(LightRampPlayerPos.north_orb_first_dodge)
+	if strat == Strat.NA:
+		if n_orb_pattern:
+			move_lr_party(LRPosNA.north_orb_first_dodge)
+		else:
+			move_lr_party(LRPosNA.south_orb_first_dodge)
 	else:
-		move_lr_party(LightRampPlayerPos.south_orb_first_dodge)
+		if n_orb_pattern:
+			move_lr_party(LRPosEU.north_orb_first_dodge)
+		else:
+			move_lr_party(LRPosEU.south_orb_first_dodge)
+	
 
 
 ## 25.00
@@ -316,17 +363,23 @@ func first_orbs_hit() -> void:
 	var this_orb_list = n_orb_list if n_orb_pattern else s_orb_list
 	for orb: P2LargeOrb in this_orb_list:
 		ground_aoe_controller.spawn_circle(v2(orb.global_position),
-			LARGE_ORB_RADIUS, LARGE_ORB_DURATION, LARGE_ORB_COLOR, [0, 0, "[ph](Orb AoE)"])
+			LARGE_ORB_RADIUS, LARGE_ORB_DURATION, LARGE_ORB_COLOR, [0, 0, "Light Orb AoE"])
 		orb.visible = false
 
 ## 27.00
 # Move group to second safe spot
 # Remove chains
 func move_safe_spot_2() -> void:
-	if n_orb_pattern:
-		move_lr_party(LightRampPlayerPos.north_orb_second_dodge)
+	if strat == Strat.NA:
+		if n_orb_pattern:
+			move_lr_party(LRPosNA.north_orb_second_dodge)
+		else:
+			move_lr_party(LRPosNA.south_orb_second_dodge)
 	else:
-		move_lr_party(LightRampPlayerPos.south_orb_second_dodge)
+		if n_orb_pattern:
+			move_lr_party(LRPosEU.north_orb_second_dodge)
+		else:
+			move_lr_party(LRPosEU.south_orb_second_dodge)
 	# Remove all chains
 	lr_chains_controller.remove_all_chains()
 
@@ -338,7 +391,7 @@ func second_orbs_hit() -> void:
 	var this_orb_list = s_orb_list if n_orb_pattern else n_orb_list
 	for orb: P2LargeOrb in this_orb_list:
 		ground_aoe_controller.spawn_circle(v2(orb.global_position),
-			LARGE_ORB_RADIUS, LARGE_ORB_DURATION, LARGE_ORB_COLOR, [0, 0, "[ph](Orb AoE)"])
+			LARGE_ORB_RADIUS, LARGE_ORB_DURATION, LARGE_ORB_COLOR, [0, 0, "Light Orb AoE"])
 		orb.visible = false
 	move_middle_safe_spot()
 	# Show Shiva
@@ -346,10 +399,16 @@ func second_orbs_hit() -> void:
 
 
 func move_middle_safe_spot() -> void:
-	if n_orb_pattern:
-		move_lr_party(LightRampPlayerPos.n_pattern_middle_dodge)
+	if strat == Strat.NA:
+		if n_orb_pattern:
+			move_lr_party(LRPosNA.n_pattern_middle_dodge)
+		else:
+			move_lr_party(LRPosNA.s_pattern_middle_dodge)
 	else:
-		move_lr_party(LightRampPlayerPos.s_pattern_middle_dodge)
+		if n_orb_pattern:
+			move_lr_party(LRPosEU.n_pattern_middle_dodge)
+		else:
+			move_lr_party(LRPosEU.s_pattern_middle_dodge)
 	# Move tower soakers in
 	for index in range(4,8):
 		party[lightsteeped_keys[index]].move_to(Vector2(0, 0))
@@ -385,9 +444,9 @@ func middle_tower_snapshot() -> void:
 # Move to spread/pair spots
 func move_spread_pairs() -> void:
 	if halo_spread_pattern:
-		move_party(party, LightRampPlayerPos.spread_clocks)
+		move_party(party, LRPosNA.spread_clocks)
 	else:
-		move_party(party, LightRampPlayerPos.pairs)
+		move_party(party, LRPosNA.pairs)
 
 
 ## 37.1
@@ -402,14 +461,14 @@ func spread_pairs_hit() -> void:
 		var keys = support_keys if randi() % 2 == 0 else dps_keys
 		for key in keys:
 			ground_aoe_controller.spawn_circle(v2(party[key].global_position), PAIRS_AOE_RADIUS,
-				PAIRS_AOE_LIFETIME, PAIRS_AOE_COLOR, [2, 2, "[ph] Banish III Shared (Pairs AoE)"])
+				PAIRS_AOE_LIFETIME, PAIRS_AOE_COLOR, [2, 2, "Banish III Shared (Pairs AoE)"])
 	shiva.hide_halo()
 
 
 ## 38.0
 # Move to clock pos
 func move_to_clock_pos() -> void:
-	move_party(party, LightRampPlayerPos.spread_clocks)
+	move_party(party, LRPosNA.spread_clocks)
 
 
 ## 40.0
@@ -454,8 +513,13 @@ func four_four_party_setup() -> void:
 		spread_keys_index.append(rand)
 	
 	# Order spread (puddle) based on north/south prio
-	if spread_ns_prio.find(spread_keys_index[0]) > spread_ns_prio.find(spread_keys_index[1]):
-		spread_keys_index.append(spread_keys_index.pop_at(0))
+	# NA
+	if strat == Strat.NA:
+		if na_we_spread_prio.find(spread_keys_index[0]) > na_we_spread_prio.find(spread_keys_index[1]):
+			spread_keys_index.append(spread_keys_index.pop_at(0))
+	elif strat == Strat.EU:
+		if eu_ns_spread_prio.find(spread_keys_index[0]) > eu_ns_spread_prio.find(spread_keys_index[1]):
+			spread_keys_index.append(spread_keys_index.pop_at(0))
 	# Remove spread from lineups (0-3 is north, 4-7 is south)
 	for index in spread_keys_index:
 		if index < 4:
