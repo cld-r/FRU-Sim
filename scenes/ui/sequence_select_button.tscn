@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://scenes/ui/sequence_select_button.gd" id="1_hfr61"]
 
 [node name="SequenceSelectButton" type="OptionButton"]
+custom_minimum_size = Vector2(191, 0)
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0

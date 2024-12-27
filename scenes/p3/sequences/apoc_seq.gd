@@ -7,6 +7,7 @@ extends Node
 
 enum {NONE, SHORT, MED, LONG}  # Water debuff durations.
 enum Strat {NAUR, LPDU}
+enum Spread {STATIC, PERMA}   # Freepoc, Permaswap
 
 const DARK_WATER_ICON = preload("res://scenes/ui/auras/debuff_icons/p3/dark_water_icon.tscn")
 
@@ -36,6 +37,11 @@ const CCW_ROTATION_MAP := {0: -135, 45: -90, 90: -45, 135: 0}
 # Determines where T2 goes for bait (assuming no swap)
 const T2_ROTATION_CW := {0: -45, 45: 0, 90: -135, 135: -90}
 const T2_ROTATION_CCW := {0: -45, 45: 0, 90: 45, 135: 90}
+
+const PARTY_SA_STATIC := {
+	"nl_dps": "m1", "nr_dps": "m2", "fl_dps": "r1", "fr_dps": "r2",
+	"nl_sup": "t1", "nr_sup": "t2", "fl_sup": "h1", "fr_sup": "h2"
+}
 
 @onready var apoc_lights: ApocLights = %ApocLights
 @onready var apoc_anim: AnimationPlayer = %ApocAnim
@@ -72,6 +78,7 @@ var cw_light: bool   # Rotation direction for apoc lights
 var arena_rotation_deg := 0
 var jump_target: String
 var strat: Strat
+var apoc_spread: Spread
 var t2_nw_bait_pos := Vector2(30, -30)
 var t2_nw_bait_pos_close := Vector2(10, -10)
 var t2_swapped := false
@@ -82,11 +89,18 @@ func start_sequence(new_party: Dictionary) -> void:
 	ground_aoe_controller.preload_aoe(["circle"])
 	lockon_controller.pre_load([LockonController.SPREAD_MARKER_APOC,
 		LockonController.STACK_MARKER, LockonController.CD_COG])
+	# Get Strat.
 	strat = SavedVariables.save_data["settings"]["p3_sa_strat"]
 	if strat != Strat.NAUR and strat != Strat.LPDU:
 		# Fix invalid SavedVariables, defaults to NA.
 		GameEvents.emit_variable_saved("settings", "p3_sa_strat", 0)
 		strat = Strat.NAUR
+	# Get Apoc Spread.
+	apoc_spread = SavedVariables.save_data["settings"]["p3_sa_swap"]
+	if apoc_spread != Spread.STATIC and apoc_spread != Spread.PERMA:
+		# Fix invalid SavedVariables, defaults to Static.
+		GameEvents.emit_variable_saved("settings", "p3_sa_swap", 0)
+		apoc_spread = Spread.STATIC
 	instantiate_party(new_party)
 	apoc_anim.play("apoc")
 
@@ -236,13 +250,26 @@ func spirit_taker_hit():
 		SPIRIT_RADIUS, SPIRIT_LIFETIME, SPIRIT_COLOR, [1, 1, "Spirit Taker (Spread)"])
 
 
+## 26.5
+# Move swaps back if NA
+func pre_move_swaps():
+	if apoc_spread == Spread.STATIC:
+		move_party_sa_static(ApocPos.SPREAD_NA)
+
+
 ## 28.0
 # Move to Apoc Spread pos (move bots as late as possible).
 func move_apoc_spread():
 	if cw_light:
-		move_party_sa_rotated(ApocPos.APOC_SPREAD_CW, CW_ROTATION_MAP[arena_rotation_deg])
+		if apoc_spread == Spread.STATIC:
+			move_party_sa_static_rotated(ApocPos.APOC_SPREAD_CW, CW_ROTATION_MAP[arena_rotation_deg])
+		else:
+			move_party_sa_rotated(ApocPos.APOC_SPREAD_CW, CW_ROTATION_MAP[arena_rotation_deg])
 	else:
-		move_party_sa_rotated(ApocPos.APOC_SPREAD_CCW, CCW_ROTATION_MAP[arena_rotation_deg])
+		if apoc_spread == Spread.STATIC:
+			move_party_sa_static_rotated(ApocPos.APOC_SPREAD_CCW, CCW_ROTATION_MAP[arena_rotation_deg])
+		else:
+			move_party_sa_rotated(ApocPos.APOC_SPREAD_CCW, CCW_ROTATION_MAP[arena_rotation_deg])
 
 
 ## 30.9
@@ -273,9 +300,15 @@ func eruption_hit():
 # Move to post eruption pos
 func move_post_erupt():
 	if cw_light:
-		move_party_sa_rotated(ApocPos.POST_ERUPTION, CW_ROTATION_MAP[arena_rotation_deg])
+		if apoc_spread == Spread.STATIC:
+			move_party_sa_static_rotated(ApocPos.POST_ERUPTION, CW_ROTATION_MAP[arena_rotation_deg])
+		else:
+			move_party_sa_rotated(ApocPos.POST_ERUPTION, CW_ROTATION_MAP[arena_rotation_deg])
 	else:
-		move_party_sa_rotated(ApocPos.POST_ERUPTION, CCW_ROTATION_MAP[arena_rotation_deg])
+		if apoc_spread == Spread.STATIC:
+			move_party_sa_static_rotated(ApocPos.POST_ERUPTION, CCW_ROTATION_MAP[arena_rotation_deg])
+		else:
+			move_party_sa_rotated(ApocPos.POST_ERUPTION, CCW_ROTATION_MAP[arena_rotation_deg])
 
 
 ## 37.0
@@ -495,6 +528,11 @@ func get_char_sa(sa_key) -> PlayableCharacter:
 	return party[party_keys_sa[sa_key]]
 
 
+# Return CharacterBody given it's Apoc position key.
+func get_char_sa_static(sa_key) -> PlayableCharacter:
+	return party[PARTY_SA_STATIC[sa_key]]
+
+
 # Moves Party based on standard role keys.
 func move_party(pos: Dictionary) -> void:
 	for key: String in pos:
@@ -520,6 +558,20 @@ func move_party_sa(pos: Dictionary) -> void:
 func move_party_sa_rotated(pos: Dictionary, rotation: float) -> void:
 	for key: String in pos:
 		var pc: PlayableCharacter = get_char_sa(key)
+		pc.move_to(pos[key].rotated(deg_to_rad(rotation)))
+
+
+# Moves Party based on static Apoc position keys. Also rotates positions CW by rotation in deg.
+func move_party_sa_static(pos: Dictionary) -> void:
+	for key: String in pos:
+		var pc: PlayableCharacter = get_char_sa_static(key)
+		pc.move_to(pos[key])
+
+
+# Moves Party based on static Apoc position keys. Also rotates positions CW by rotation in deg.
+func move_party_sa_static_rotated(pos: Dictionary, rotation: float) -> void:
+	for key: String in pos:
+		var pc: PlayableCharacter = get_char_sa_static(key)
 		pc.move_to(pos[key].rotated(deg_to_rad(rotation)))
 
 
