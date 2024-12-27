@@ -11,7 +11,7 @@ func _ready() -> void:
 		camera = player.get_camera()
 
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	if !camera:
 		set_process(false)
 		return

@@ -3,7 +3,8 @@ extends Node
 var seq_scene_paths := {
 	0: "res://scenes/p2/p2_main.tscn",
 	1: "res://scenes/p3/p3_main.tscn",
-	2: "res://scenes/p4/p4_main.tscn"
+	2: "res://scenes/p3/p3_apoc_main.tscn",
+	3: "res://scenes/p4/p4_main.tscn"
 }
 
 

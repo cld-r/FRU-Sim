@@ -506,6 +506,10 @@ func four_four_party_setup() -> void:
 	#var party_keys : Array = party.keys()
 	# Get 2 unique random keys
 	var spread_keys_index := []
+	# Manual puddle force by user.
+	if Global.p2_force_puddles:
+		var player: PlayableCharacter = get_tree().get_first_node_in_group("player")
+		spread_keys_index.append(lightsteeped_keys.find(player.get_role()))
 	while spread_keys_index.size() < 2:
 		var rand = randi_range(0, 7)
 		if spread_keys_index.has(rand):

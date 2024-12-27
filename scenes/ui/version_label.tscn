@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://cmakti71sjg46"]
+
+[node name="VersionLabel" type="Label"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -85.0
+offset_top = -26.0
+offset_right = -6.0
+offset_bottom = -1.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "Beta v1.4.0
+"
+horizontal_alignment = 2

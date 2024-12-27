@@ -20,6 +20,7 @@ height = 0.001
 
 [node name="StackMarker" type="Node3D"]
 script = ExtResource("1_qrcrw")
+metadata/id = 13
 
 [node name="ScaleFactor" type="Node3D" parent="."]
 transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, 0, 0, 0)

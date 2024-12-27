@@ -286,7 +286,7 @@ func on_spectate_mode_changed() -> void:
 
 
 # Used to update sensitivity when changed in controls menu.
-func on_variable_saved(section: String, key: String, value: Variant) -> void:
+func on_variable_saved(_section: String, key: String, _value: Variant) -> void:
 	if key.contains("sens") or key == "invert_y":
 		mouse_sensitivity = BASE_MOUSE_SENS * SavedVariables.save_data["settings"]["mouse_sens"]
 		x_sensitivity = BASE_Y_SENS * SavedVariables.save_data["settings"]["x_sens"]

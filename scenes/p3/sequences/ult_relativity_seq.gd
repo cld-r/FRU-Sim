@@ -526,7 +526,7 @@ func party_setup() -> void:
 	party_keys_ur["f1_dps_se"] = shuffle_list[3]
 	
 	# Repeat for supports. Supp assignments: 0=f1, 1=f2, 2=f3nw, 3=f3ne
-	shuffle_list = na_sup_prio.duplicate()
+	shuffle_list = sup_prio.duplicate()
 	shuffle_list.shuffle()
 	
 	# Handle manual debuff selection for player
@@ -535,7 +535,7 @@ func party_setup() -> void:
 		shuffle_list.erase(supp_key)
 		shuffle_list.insert(Global.p3_selected_debuff - 1, supp_key)
 	
-	if na_sup_prio.find(shuffle_list[2]) > na_sup_prio.find(shuffle_list[3]):
+	if sup_prio.find(shuffle_list[2]) > sup_prio.find(shuffle_list[3]):
 		shuffle_list.append(shuffle_list.pop_at(2))
 	party_keys_ur["f1_sup"] = shuffle_list[0]
 	party_keys_ur["f2_sup"] = shuffle_list[1]

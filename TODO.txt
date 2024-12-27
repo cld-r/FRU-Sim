@@ -26,14 +26,18 @@
 ### Modules:
 	- Pre-load shaders on first launch.
 
-### P2:
+### P2 LR:
 	- Add Locked Chains Icon/Debuff.
 	- Move non-tower soakers to their next safe spots earlier.
+	- Add real distance checking/chain assignment for start of LR.
 
-### P3:
+### P3 UR:
 	- Add delay in fires moving out to avoid clipping lasers.
 	- Fix laser hitbox for jumping.
 	- Force free player after slide (player getting stuck).
+
+### P3 Apoc:
+	- Add user option for forcing double swap.
 
 ### Non-critical:
 	- Scrolling damage text.

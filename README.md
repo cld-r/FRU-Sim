@@ -1,6 +1,6 @@
 # FRU-Sim
 
-This is a solo/offline sim for FRU. It is currently in development and has modules for Light Rampant, Ultimate Relativity and Crystallize Time.
+This is a solo/offline sim for FRU. It is currently in development and has modules for Light Rampant, Ultimate Relativity, Sextuple Apocalypse and Crystallize Time.
 
 If you have any questions, feel free to join us on [Discord](https://discord.gg/P9adFHADrX).
 
@@ -10,6 +10,7 @@ To download the sim, head to the ⁠[releases](https://github.com/WCGH/FRU-Sim/r
 
 
 ## Known Issues:
+- The sim will not run on some laptop or Intel GPU's. If it doesn't launch for you, there is a laptop friendly version under releases that you can try.
 - Characters will sometimes get stuck running in place.
 - Abilities can be activated while in spectate mode.
-- Crystallize Time: bots occasionally will fail to get their soaks.
+- Crystallize Time: bots will sometimes fail to get their soaks.

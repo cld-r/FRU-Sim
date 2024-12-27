@@ -5,453 +5,418 @@
 
 extends Node
 
-# Debuff Icon Scenes
-const STUN_ICON = preload("res://scenes/ui/auras/debuff_icons/common/stun_icon.tscn")
-const DARK_BLIZZARD_ICON = preload("res://scenes/ui/auras/debuff_icons/p3/dark_blizzard_icon.tscn")
-const DARK_ERUPTION = preload("res://scenes/ui/auras/debuff_icons/p3/dark_eruption.tscn")
-const DARK_FIRE_ICON = preload("res://scenes/ui/auras/debuff_icons/p3/dark_fire_icon.tscn")
-const DARK_WATER_ICON = preload("res://scenes/ui/auras/debuff_icons/p3/dark_water_icon.tscn")
-const RETURN_ICON = preload("res://scenes/ui/auras/debuff_icons/p3/return_icon.tscn")
-const SHADOWEYE_ICON = preload("res://scenes/ui/auras/debuff_icons/p3/shadoweye_icon.tscn")
-const UNHOLY_DARKNESS_ICON = preload("res://scenes/ui/auras/debuff_icons/p3/unholy_darkness_icon.tscn")
-const REWIND_MARKER = preload("res://scenes/p3/arena/rewind_marker.tscn")
+enum {NONE, SHORT, MED, LONG}  # Water debuff durations.
+enum Strat {NAUR, LPDU}
 
-const FIRE_RADIUS := 23.0
-const FIRE_LIFETIME := 0.3
-const FIRE_COLOR := Color(1, 0.270588, 0, 0.3)
-const UD_RADIUS := 9.0
-const UD_LIFETIME := 0.3
-const UD_COLOR := Color.REBECCA_PURPLE
-const ICE_RADIUS_INNER := 7.0
-const ICE_RADIUS_OUTTER := 28.0
-const ICE_LIFETIME := 0.3
-const ICE_COLOR := Color.SKY_BLUE
-const WATER_RADIUS := 9.0
-const WATER_LIFETIME := 0.3
+const DARK_WATER_ICON = preload("res://scenes/ui/auras/debuff_icons/p3/dark_water_icon.tscn")
+
+const SPIRIT_RADIUS := 10.0
+const SPIRIT_LIFETIME := 0.3
+const SPIRIT_COLOR := Color.REBECCA_PURPLE
+const WATER_RADIUS := 10.0
+const WATER_LIFETIME := 0.4
 const WATER_COLOR := Color.DODGER_BLUE
 const ERUPTION_RADIUS := 15.0
 const ERUPTION_LIFETIME := 0.3
 const ERUPTION_COLOR := Color(0.545098, 0, 0, 0.2)
-const SHELL_RADIUS := 9.0
-const SHELL_LIFETIME := 0.3
-const SHELL_COLOR := Color.NAVY_BLUE
-const SLIDE_TIME := 0.4
+const JUMP_BUFFER := 15.0
+const JUMP_DURATION := 0.5
+const JUMP_RADIUS := 16.0
+const JUMP_LIFETIME := 0.3
+const JUMP_COLOR := Color.REBECCA_PURPLE
+const KB_DIST := 49.2
+const KB_DURATION := 0.7
+const FLANK_STACK_DIST := 11.0
 
+# This matches the arena rotation to the player position rotations, depending on cw/ccw motion.
+# Arena rotation at 0 deg is N/S lights. Player pos rotation at 0 deg is NE/SW for CW and NW/SE for CCW.
+# All rotations are clockwise.
+const CW_ROTATION_MAP := {0: -45, 45: 0, 90: -135, 135: -90}
+const CCW_ROTATION_MAP := {0: -135, 45: -90, 90: -45, 135: 0}
+# Determines where T2 goes for bait (assuming no swap)
+const T2_ROTATION_CW := {0: -45, 45: 0, 90: -135, 135: -90}
+const T2_ROTATION_CCW := {0: -45, 45: 0, 90: 45, 135: 90}
+
+@onready var apoc_lights: ApocLights = %ApocLights
 @onready var apoc_anim: AnimationPlayer = %ApocAnim
 @onready var cast_bar: CastBar = %CastBar
 @onready var clone_cast_bar: CloneCastBar = %CloneCastBar
 @onready var ground_aoe_controller: GroundAoeController = %GroundAoEController
 @onready var lockon_controller: LockonController = %LockonController
-@onready var oracle: Node3D = %Oracle
+@onready var oracle: Oracle = %Oracle
+@onready var boss: Node3D = %Boss
 @onready var special_markers: Node3D = %SpecialMarkers
 @onready var ground_markers: Node3D = %GroundMarkers
 @onready var fail_list: FailList = %FailList
 
 var party: Dictionary
-var na_dps_prio := ["r2", "r1", "m1", "m2"]
-var na_sup_prio := ["h2", "h1", "t1", "t2"]
-var party_keys_ur := {
-	"f1_dps_sw": "", "f1_dps_se": "", "f1_sup": "",
-	"f2_dps": "", "f2_sup": "",
-	"f3_sup_nw": "", "f3_sup_ne": "","f3_dps": ""
-	}
+# Adjust prios for both NA and EU
+var dps_adjust_prio := ["m1", "m2", "r1", "r2"]
+var sup_adjust_prio := ["t1", "t2", "h1", "h2"]
+# Square positions after adjust (near left/right, far left/right)
+var party_keys_sa := {
+	"nl_dps": "m1", "nr_dps": "m2", "fl_dps": "r1", "fr_dps": "r2",
+	"nl_sup": "t1", "nr_sup": "t2", "fl_sup": "h1", "fr_sup": "h2"
+}
 var static_debuff_assignments := {
-	"f1_dps_sw": {DARK_FIRE_ICON: 11, RETURN_ICON: 16, DARK_ERUPTION: 43},
-	"f1_dps_se": {DARK_FIRE_ICON: 11, RETURN_ICON: 16, DARK_ERUPTION: 43},
-	"f2_dps": {DARK_FIRE_ICON: 21, RETURN_ICON: 16, DARK_WATER_ICON: 43},
-	"f2_sup": {DARK_FIRE_ICON: 21, RETURN_ICON: 16, DARK_ERUPTION: 43},
-	"f3_sup_nw": {DARK_FIRE_ICON: 31, RETURN_ICON: 26, SHADOWEYE_ICON: 43},
-	"f3_sup_ne": {DARK_FIRE_ICON: 31, RETURN_ICON: 26, SHADOWEYE_ICON: 43}
+	NONE: {},
+	SHORT: {DARK_WATER_ICON: 10},
+	MED: {DARK_WATER_ICON: 29},
+	LONG: {DARK_WATER_ICON: 38}
 }
-var dps_ice_debuff_assignments := {
-	"f1_sup": {DARK_FIRE_ICON: 11, RETURN_ICON: 16, DARK_ERUPTION: 43},
-	"f3_dps": {DARK_BLIZZARD_ICON: 21, RETURN_ICON: 26, SHADOWEYE_ICON: 43}
-}
-var sup_ice_debuff_assignments := {
-	"f1_sup": {DARK_BLIZZARD_ICON: 21, RETURN_ICON: 16, DARK_ERUPTION: 43},
-	"f3_dps": {DARK_FIRE_ICON: 31, RETURN_ICON: 26, SHADOWEYE_ICON: 43}
-}
-# Valid targets for unholy darkness. 0=short, 1=med, 2=long.
-var valid_ud_keys := [
-	["f2_dps", "f2_sup", "f3_sup_nw", "f3_sup_ne", "f3_dps"],
-	["f1_dps_sw", "f1_dps_se", "f1_sup", "f3_sup_nw", "f3_sup_ne", "f3_dps"],
-	["f1_dps_sw", "f1_dps_se", "f1_sup", "f2_dps", "f2_sup"]
-]
-@onready var hourglasses := {
-	"n": %HourglassN, "s": %HourglassS, "e": %HourglassE, "w": %HourglassW, 
-	"ne": %HourglassNE, "se": %HourglassSE, "nw": %HourglassNW, "sw": %HourglassSW
-}
-var hourglass_soakers := {
-	"n": "f1_sup", "s": "f3_dps", "e": "f2_dps", "w": "f2_sup", 
-	"ne": "f3_sup_ne", "se": "f1_dps_se", "nw": "f3_sup_nw", "sw": "f1_dps_sw"
-}
-var hourglass_rotations: Dictionary   # 0=cw, 1=ccw
-var ud_keys := []
+
+var party_debuff_key_arr := {NONE: [], SHORT: [], MED: [], LONG: []}
+var party_debuff_lockon_arr := {SHORT: [], MED: [], LONG: []}
+var party_keys_debuffs: Dictionary # [party_key][debuff_length]
+var cw_light: bool   # Rotation direction for apoc lights
 var arena_rotation_deg := 0
-var dps_ice: bool
-var active_hg_keys: Array
-var rewind_positions: Dictionary
-var rewind_ground_markers: Array
-var valid_targets: Array
+var jump_target: String
+var strat: Strat
+var t2_nw_bait_pos := Vector2(30, -30)
+var t2_nw_bait_pos_close := Vector2(10, -10)
+var t2_swapped := false
 
 
 func start_sequence(new_party: Dictionary) -> void:
 	assert(new_party != null, "Error. Where the party at?")
 	ground_aoe_controller.preload_aoe(["circle"])
-	lockon_controller.pre_load([13])
-	lockon_controller.add_marker(13, get_tree().get_first_node_in_group("player"))
-	#instantiate_party(new_party)
+	lockon_controller.pre_load([LockonController.SPREAD_MARKER_APOC,
+		LockonController.STACK_MARKER, LockonController.CD_COG])
+	strat = SavedVariables.save_data["settings"]["p3_sa_strat"]
+	if strat != Strat.NAUR and strat != Strat.LPDU:
+		# Fix invalid SavedVariables, defaults to NA.
+		GameEvents.emit_variable_saved("settings", "p3_sa_strat", 0)
+		strat = Strat.NAUR
+	instantiate_party(new_party)
 	apoc_anim.play("apoc")
 
 
 ### START OF TIMELINE ###
 
-## 1.00
-# Start Ultimate Relativity cast (9.7s)
-# Start boss animation
-func start_ur_cast() -> void:
-	cast_bar.cast("Ultimate Relativity", 9.7)
-	oracle.play_ur_cast()
+## 2.10
+# Cast Spell-in-Waiting-Refrain (1.7s)
+func cast_refrain():
+	cast_bar.cast("Spell-in-Waiting-Refrain", 1.7)
 
-## 11.8
-# Assign debuffs
-# Spawn lockons
-# Spawn hourglasses
-func assign_debuffs() -> void:
-	# Static debuffs
-	for key in static_debuff_assignments:
-		for debuff_icon in static_debuff_assignments[key]:
-			get_ur_player(key).add_debuff(debuff_icon, static_debuff_assignments[key][debuff_icon])
-	# Variable debuffs
-	if dps_ice:
-		for key in dps_ice_debuff_assignments:
-			for debuff_icon in dps_ice_debuff_assignments[key]:
-				get_ur_player(key).add_debuff(debuff_icon, dps_ice_debuff_assignments[key][debuff_icon])
+
+## 2.2
+# Move to inital role positions.
+func move_to_setup():
+	if strat == Strat.NAUR:
+		move_party(ApocPos.ROLE_SETUP_NA)
 	else:
-		for key in sup_ice_debuff_assignments:
-			for debuff_icon in sup_ice_debuff_assignments[key]:
-				get_ur_player(key).add_debuff(debuff_icon, sup_ice_debuff_assignments[key][debuff_icon])
-	# Unholy Darkness
-	for i: int in ud_keys.size():
-		get_ur_player(ud_keys[i]).add_debuff(UNHOLY_DARKNESS_ICON, (i * 10 + 11))
-	spawn_hourglasses()
+		move_party(ApocPos.ROLE_SETUP_EU)
+
+## 3.8
+# Cast anim finish
+func hands_out_cast():
+	oracle.play_ct_cast()
 
 
-func spawn_hourglasses() -> void:
-	for key in hourglasses:
-		hourglasses[key].show_hourglass()
+## 7.2
+# Show Stack marker lockons.
+# Cast Dark Water III (4.7s)
+func cast_dark_water():
+	cast_bar.cast("Dark Water III", 4.7)
+	# Stack markers
+	for key in party_keys_debuffs:
+		if party_keys_debuffs[key] != NONE:
+			lockon_controller.add_marker(LockonController.STACK_MARKER, get_char(key))
 
-## 15.0
-# Start Speed cast (5.3).
-# Spawn hourglass tethers.
-func spawn_tethers() -> void:
-	cast_bar.cast("Speed", 5.3)
-	hourglasses["nw"].show_yellow_tether()
-	hourglasses["ne"].show_yellow_tether()
-	hourglasses["s"].show_yellow_tether()
-	hourglasses["w"].show_purple_tether()
-	hourglasses["e"].show_purple_tether()
 
-## 19.2
-# 1st Fire/Stack.
-# Move short fires out.
-func move_first_fire() -> void:
-	if dps_ice:
-		move_party_ur_rotated(UltRelativityPcPos.fire_1_dps_ice)
+## 12.1
+# Hide stack markers
+func hide_stack_markers():
+	for key in party_keys_debuffs:
+		if party_keys_debuffs[key] != NONE:
+			lockon_controller.remove_marker(LockonController.STACK_MARKER, get_char(key))
+
+
+## 12.8
+# Add Water debuffs
+# Show lockon markers.
+# Cast anim finish
+func add_water_debuffs():
+	for key in party_keys_debuffs:
+		var duration = party_keys_debuffs[key]
+		for debuff_key in static_debuff_assignments[duration]:
+			get_char(key).add_debuff(debuff_key, static_debuff_assignments[duration][debuff_key])
+		# Lockon markers
+		if duration != NONE:
+			var lockon = lockon_controller.add_marker(LockonController.CD_COG, get_char(key))
+			party_debuff_lockon_arr[duration].append(lockon)
+	# Cast animation
+	oracle.play_ct_cast()
+
+
+## 15.3
+# Cast Apocalypse (3.7s)
+func cast_apoc():
+	cast_bar.cast("Apocalypse", 3.7)
+
+
+## 15.6
+# Make swaps if needed
+func move_to_swap_pos():
+	if strat == Strat.NAUR:
+		move_party_sa(ApocPos.SWAP_SETUP_NA)
 	else:
-		move_party_ur_rotated(UltRelativityPcPos.fire_1_sup_ice)
-
-## 20.3
-# Hide tethers
-func hide_tethers() -> void:
-	for key in hourglasses:
-		hourglasses[key].hide_tether()
-
-## 22.9
-# Short fires hit. Short Middle stack hits.
-func first_fire_hit() -> void:
-	var fire_targets := []
-	fire_targets.append(get_ur_player("f1_dps_sw"))
-	fire_targets.append(get_ur_player("f1_dps_se"))
-	if dps_ice:
-		fire_targets.append(get_ur_player("f1_sup"))
-	for target in fire_targets:
-		ground_aoe_controller.spawn_circle(v2(target.global_position), FIRE_RADIUS,
-			FIRE_LIFETIME, FIRE_COLOR, [1, 1, "Dark Fire III", [target]])
-	# UD hit
-	var ud_target: PlayableCharacter = get_ur_player(ud_keys[0])
-	ground_aoe_controller.spawn_circle(v2(ud_target.global_position),
-		UD_RADIUS, UD_LIFETIME, UD_COLOR, [5, 8, "Unholy Darkness (Group Stack)"])
+		move_party_sa(ApocPos.SWAP_SETUP_EU)
 
 
-## 23.9
-# Start clone cast SinboundMeltdown x3 (3.7s).
-# Start Rotate telegraphs on yellow hourglasses.
-# Move to 1st Bait/Rewind positions (short fires in, 1st baits out).
-func first_rotate() -> void:
-	start_sinbound(["nw", "ne", "s"])
-	move_first_bait()
+## 18.0
+# Start short lockon countdown
+func short_lock_cd():
+	start_lock_cd(SHORT)
 
 
-func start_sinbound(hourglass_keys: Array) -> void:
-	active_hg_keys = hourglass_keys
-	# Clone casts
-	clone_cast_bar.cast_clone("Sinbound Meltdown", 3.7, active_hg_keys.size())
-	# Start hourglass rotations.
-	for key in active_hg_keys:
-		if hourglass_rotations[key] == 0:
-			hourglasses[key].play_rotate_cw()
-		else:
-			hourglasses[key].play_rotate_ccw()
+func start_lock_cd(duration):
+	for lockon: CDCog in party_debuff_lockon_arr[duration]:
+		lockon.start_countdown()
 
 
-func move_first_bait() -> void:
-	# Move everyone to base positions (CW)
-	move_party_ur_rotated(UltRelativityPcPos.bait_rewind_1_cw)
-	# Adjust baits if CCW
-	for key in active_hg_keys:
-		if hourglass_rotations[key] == 1:
-			var pc: PlayableCharacter = get_ur_player(hourglass_soakers[key])
-			pc.move_to(UltRelativityPcPos.bait_rewind_1_ccw[hourglass_soakers[key]]\
-				.rotated(deg_to_rad(arena_rotation_deg)))
+## 19.0
+# Cast anim finish
 
 
-## 27.6
-# Snapshot rewind positions.
-# Spawn rewind ground markers.
-# Start first hourglass line AoE's.
-func first_rewind_snapshot() -> void:
-	# Snapshot rewinds
-	rewind_snapshot(["f1_dps_sw", "f1_dps_se", "f2_dps", "f1_sup", "f2_sup"])
-
-
-func rewind_snapshot(rewind_keys: Array) -> void:
-	rewind_ground_markers = []
-	# Snapshot rewinds
-	for key in rewind_keys:
-		var pos: Vector3 = get_ur_player(key).global_position
-		rewind_positions[key] = v2(pos)
-		# Drop ground aoe
-		var new_marker = REWIND_MARKER.instantiate()
-		ground_markers.add_child(new_marker)
-		new_marker.global_position = pos
-		rewind_ground_markers.append(new_marker)
-	# Start hourglass lasers
-	for hg_key in active_hg_keys:
-		hourglasses[hg_key].fire_laser(valid_targets, hourglass_rotations[hg_key])
-
-
-## 28.6
-# Move to 2nd Fire/Stack+Ice positions (fires move to intermediate pos).
-func move_second_fire() -> void:
-	move_party_ur_rotated(UltRelativityPcPos.fire_2_inter)
-
-
-## 30.6
-# Move 2nd Fires all the way out.
-func move_second_fire_out() -> void:
-	move_party_ur_rotated(UltRelativityPcPos.fire_2)
-	# Remove short rewind ground markers.
-	for aoe: Node3D in rewind_ground_markers:
-		aoe.queue_free()
-
-
-## 32.8
-# 2nd Fire + middle Ice/UD hits
-func second_fire_hit() -> void:
-	# Fires
-	var fire_targets = [get_ur_player("f2_dps"), get_ur_player("f2_sup")]
-	for target in fire_targets:
-		ground_aoe_controller.spawn_circle(v2(target.global_position), FIRE_RADIUS,
-			FIRE_LIFETIME, FIRE_COLOR, [1, 1, "Dark Fire III", [target]])
-	# Ice
-	var ice_target: PlayableCharacter
-	if dps_ice:
-		ice_target = get_ur_player("f3_dps")
+## 20.2
+# Move to stack pos
+func move_stack_1():
+	if strat == Strat.NAUR:
+		move_party_sa(ApocPos.STACK_1_NA)
 	else:
-		ice_target = get_ur_player("f1_sup")
-	ground_aoe_controller.spawn_donut(v2(ice_target.global_position), ICE_RADIUS_INNER,
-		ICE_RADIUS_OUTTER, ICE_LIFETIME, ICE_COLOR, [0, 0, "Dark Blizzard III (Donut)"])
-	# UD
-	var ud_target: PlayableCharacter = get_ur_player(ud_keys[1])
-	ground_aoe_controller.spawn_circle(v2(ud_target.global_position),
-		UD_RADIUS, UD_LIFETIME, UD_COLOR, [5, 8, "Unholy Darkness (Group Stack)"])
+		move_party_sa(ApocPos.STACK_1_EU)
 
 
-## 34.0
-# Move 2nd Bait/Rewind positions (short fires bait, eyes MID NE/NW/S, others cheat out for clarity)
-# Start clone cast SinboundMeltdown x3 (3.7s).
-# Start Rotate telegraphs on no-tether hourglasses.
-func second_rotate() -> void:
-	start_sinbound(["sw", "se", "n"])
-	move_second_bait()
+## 21.5
+# Cast Spirit Taker (2.6s)
+func cast_spirit():
+	cast_bar.cast("Spirit Taker", 2.6)
 
 
-func move_second_bait() -> void:
-	# Move everyone to base positions (CW)
-	move_party_ur_rotated(UltRelativityPcPos.bait_rewind_2_cw)
-	# Adjust baits if CCW
-	for key in active_hg_keys:
-		if hourglass_rotations[key] == 1:
-			var pc: PlayableCharacter = get_ur_player(hourglass_soakers[key])
-			pc.move_to(UltRelativityPcPos.bait_rewind_2_ccw[hourglass_soakers[key]]\
-				.rotated(deg_to_rad(arena_rotation_deg)))
+## 22.0
+# Start Apoc Light Sequence
+func start_apoc():
+	apoc_lights.start_lights(cw_light)
 
 
-## 37.7
-# Snapshot long rewind positions.
-# Spawn rewind ground markers.
-# Start hourglass line AoE's.
-func second_rewind_snapshot() -> void:
-	rewind_snapshot(["f3_sup_nw", "f3_sup_ne", "f3_dps"])
+## 23.1
+# Short Water hit
+func short_water_hit():
+	water_hit(SHORT)
 
 
-## 38.7
-# Move to 3rd Fire/Stack positions (long fires out, everyone else mid).
-func move_third_fire() -> void:
-	move_party_ur_rotated(UltRelativityPcPos.fire_3)
+func water_hit(duration: int):
+	for key in party_keys_debuffs:
+		if party_keys_debuffs[key] == duration:
+			ground_aoe_controller.spawn_circle(v2(get_char(key).global_position),
+				WATER_RADIUS, WATER_LIFETIME, WATER_COLOR, [4, 4, "Dark Water III"])
 
 
-## 42.8
-# 3rd Fires hit.
-func third_fires_hit() -> void:
-	# Fires
-	var fire_targets := []
-	fire_targets.append(get_ur_player("f3_sup_nw"))
-	fire_targets.append(get_ur_player("f3_sup_ne"))
-	if !dps_ice:
-		fire_targets.append(party[party_keys_ur["f3_dps"]])
-	for target in fire_targets:
-		ground_aoe_controller.spawn_circle(v2(target.global_position), FIRE_RADIUS,
-			FIRE_LIFETIME, FIRE_COLOR, [1, 1, "Dark Fire III", [target]])
-	# UD hit
-	var ud_target: PlayableCharacter = get_ur_player(ud_keys[2])
-	ground_aoe_controller.spawn_circle(v2(ud_target.global_position),
-		UD_RADIUS, UD_LIFETIME, UD_COLOR, [5, 8, "Unholy Darkness (Group Stack)"])
-	# Remove long rewind ground markers.
-	for aoe: Node3D in rewind_ground_markers:
-		aoe.queue_free()
+## 23.8
+# Return to spread pos.
+func move_to_spread_pos():
+	if strat == Strat.NAUR:
+		move_party_sa(ApocPos.SPREAD_NA)
+	else:
+		move_party_sa(ApocPos.SPREAD_EU)
 
 
-## 45.0
-# Start clone cast SinboundMeltdown x3 (3.7s).
-# Start Rotate telegraphs on yellow hourglasses.
-# Move to 3rd Bait positions.
-func third_rotate() -> void:
-	start_sinbound(["e", "w"])
-	move_third_bait()
-
-
-func move_third_bait() -> void:
-	# Move everyone to base positions (CW)
-	move_party_ur_rotated(UltRelativityPcPos.bait_rewind_3_cw)
-	# Adjust baits if CCW
-	for key in active_hg_keys:
-		if hourglass_rotations[key] == 1:
-			var pc: PlayableCharacter = get_ur_player(hourglass_soakers[key])
-			pc.move_to(UltRelativityPcPos.bait_rewind_3_ccw[hourglass_soakers[key]]\
-				.rotated(deg_to_rad(arena_rotation_deg)))
-
-
-## 48.7
-# Start hourglass line AoE's.
-# Move 3rd baits in.
-func move_final() -> void:
-	# Start hourglass lasers
-	for hg_key in active_hg_keys:
-		hourglasses[hg_key].fire_laser(valid_targets, hourglass_rotations[hg_key])
-	# Move to pre-slide positions
-	move_party_ur_rotated(UltRelativityPcPos.pre_slide)
-
-## 51.0
-# Look at "out" positions.
-func look_out() -> void:
-	for key in party_keys_ur:
-		get_ur_player(key).look_at_direction(v3(UltRelativityPcPos.look_direction[key].rotated(deg_to_rad(arena_rotation_deg))))
-
-
-## 51.9
-# Assign stun debuffs (4s), freeze player.
-func stun_players() -> void:
-	for key in party_keys_ur:
-		var pc: PlayableCharacter = get_ur_player(key)
-		pc.add_debuff(STUN_ICON, 4.0)
-		if pc.is_player():
-			pc.freeze_player()
-
-
-## 53.4
-# Slide players to rewind positions
-func slide_players() -> void:
-	for key in party_keys_ur:
-		get_ur_player(key).slide(rewind_positions[key], SLIDE_TIME)
-
-
-## 54.8
-# AoE's hit
-func final_hit() -> void:
-	# Gazes
-	var gaze_keys := ["f3_dps", "f3_sup_ne", "f3_sup_nw"]
-	for key in gaze_keys:
-		lockon_controller.add_marker(LockonController.GAZE, get_ur_player(key))
-	check_gazes(gaze_keys)
-	# Eruptions
-	var eruptions_keys := ["f1_dps_se", "f1_dps_sw", "f1_sup", "f2_sup"]
-	for key in eruptions_keys:
-		ground_aoe_controller.spawn_circle(v2(get_ur_player(key).global_position),
-			ERUPTION_RADIUS, ERUPTION_LIFETIME, ERUPTION_COLOR, [1, 1, "Dark Eruption"])
-	# Water
-	var water_target: PlayableCharacter = get_ur_player("f2_dps")
-	ground_aoe_controller.spawn_circle(v2(water_target.global_position), WATER_RADIUS,
-		WATER_LIFETIME, WATER_COLOR, [4, 4, "Dark Water III"])
-	# Unfreeze player
-	get_tree().get_first_node_in_group("player").unfreeze_player()
-
-
-# Ported from DSR Sim, I completely forgot how this works.
-func check_gazes(gaze_keys: Array) -> void:
-	for key in party_keys_ur:
-		var pc: PlayableCharacter = get_ur_player(key)
-		var pc_rotation := fposmod((rad_to_deg(pc.get_model_rotation().y) + 180), 360.0)
-		for gaze_key in gaze_keys:
-			# Can't get hit by our own gaze
-			if key == gaze_key:
-				continue
-			var angle_to_gaze_target = fposmod(rad_to_deg(v2(pc.global_position).angle_to_point(
-				v2(get_ur_player(gaze_key).global_position))) * -1 + 90, 360.0)
-			if angle_to_gaze_target < 45:
-				if pc_rotation < angle_to_gaze_target + 45 or pc_rotation > 315 + angle_to_gaze_target:
-					fail_list.add_fail(str(pc.get_name(), " looked at ", get_ur_player(gaze_key).get_name(),"'s Gaze."))
-			elif angle_to_gaze_target > 315:
-				if pc_rotation > angle_to_gaze_target - 45 or pc_rotation < angle_to_gaze_target - 315:
-					fail_list.add_fail(str(pc.get_name(), " looked at ", get_ur_player(gaze_key).get_name(),"'s Gaze."))
-			elif pc_rotation > angle_to_gaze_target - 45 and pc_rotation < angle_to_gaze_target + 45:
-				fail_list.add_fail(str(pc.get_name(), " looked at ", get_ur_player(gaze_key).get_name(),"'s Gaze."))
-
-## 55.8
-# Start Shell Crusher cast (2.8s)
-# Move players in for stack.
-func cast_shell_crusher() -> void:
-	cast_bar.cast("Shell Crusher", 2.8)
-	move_party_ur_rotated(UltRelativityPcPos.final_stack)
-	# Clear Gaze markers
-	for key in ["f3_dps", "f3_sup_ne", "f3_sup_nw"]:
-		lockon_controller.remove_marker(12, get_ur_player(key))
-
-
-## 57.8
-func play_flip_anim() -> void:
+## 24.5
+# Cast anim finish (flip)
+func cast_anim_flip():
 	oracle.play_flip_special()
 
 
-## 58.6
-# Shell Crusher hit (8 player shared)
-func shell_crusher_hit() -> void:
-	var rand_key = party.keys().pick_random()
-	ground_aoe_controller.spawn_circle(v2(party[rand_key].global_position),
-		SHELL_RADIUS, SHELL_LIFETIME, SHELL_COLOR, [8, 8, "Shell Crusher (Party Stack)"])
-	
+## 25.5
+# Spirit Taker hit
+func spirit_taker_hit():
+	var key = party.keys().pick_random()
+	ground_aoe_controller.spawn_circle(v2(get_char(key).global_position),
+		SPIRIT_RADIUS, SPIRIT_LIFETIME, SPIRIT_COLOR, [1, 1, "Spirit Taker (Spread)"])
 
+
+## 28.0
+# Move to Apoc Spread pos (move bots as late as possible).
+func move_apoc_spread():
+	if cw_light:
+		move_party_sa_rotated(ApocPos.APOC_SPREAD_CW, CW_ROTATION_MAP[arena_rotation_deg])
+	else:
+		move_party_sa_rotated(ApocPos.APOC_SPREAD_CCW, CCW_ROTATION_MAP[arena_rotation_deg])
+
+
+## 30.9
+# Cast Dark Eruption (4.7s)
+# Show spread markers
+func cast_eruption():
+	cast_bar.cast("Dark Eruption", 4.7)
+	for key in party:
+		lockon_controller.add_marker(LockonController.SPREAD_MARKER_APOC, get_char(key))
+
+## 33.4
+# First Apoc hit
+
+## 35.4
+# Second Apoc hit
+
+## 35.9
+# Eruptions hit
+# Start med lockon countdown
+func eruption_hit():
+	for key in party:
+		lockon_controller.remove_marker(LockonController.SPREAD_MARKER_APOC, get_char(key))
+		ground_aoe_controller.spawn_circle(v2(get_char(key).global_position), ERUPTION_RADIUS,
+			ERUPTION_LIFETIME, ERUPTION_COLOR, [1, 1, "Dark Eruption (Spread)"])
+
+
+## 36.2
+# Move to post eruption pos
+func move_post_erupt():
+	if cw_light:
+		move_party_sa_rotated(ApocPos.POST_ERUPTION, CW_ROTATION_MAP[arena_rotation_deg])
+	else:
+		move_party_sa_rotated(ApocPos.POST_ERUPTION, CCW_ROTATION_MAP[arena_rotation_deg])
+
+
+## 37.0
+# Move to water stack 2
+func move_stack_2():
+	if cw_light:
+		move_party_sa_rotated(ApocPos.STACK_2, CW_ROTATION_MAP[arena_rotation_deg])
+	else:
+		move_party_sa_rotated(ApocPos.STACK_2, CCW_ROTATION_MAP[arena_rotation_deg])
+
+
+## 36.8
+func med_lock_cd():
+	start_lock_cd(MED)
+
+## 37.4
+# Third Apoc hit
+
+## 38.5
+# Cast Darkest Dance (4.7s)
+func cast_dance():
+	cast_bar.cast("Darkest Dance", 4.7)
+
+## 39.4
+# Fourth Apoc hit
+
+## 41.4
+# Fifth Apoc hit
+
+
+##  41.9
+# Med Water hit
+func med_water_hit():
+	water_hit(MED)
+
+
+## 41.8
+func move_t2_short():
+	if cw_light:
+		if t2_swapped:
+			get_char("t2").move_to(t2_nw_bait_pos_close.rotated(deg_to_rad(T2_ROTATION_CW[arena_rotation_deg] + 180)))
+		else:
+			get_char("t2").move_to(t2_nw_bait_pos_close.rotated(deg_to_rad(T2_ROTATION_CW[arena_rotation_deg])))
+	else:
+		if t2_swapped:
+			get_char("t2").move_to(t2_nw_bait_pos_close.rotated(deg_to_rad(T2_ROTATION_CCW[arena_rotation_deg] + 180)))
+		else:
+			get_char("t2").move_to(t2_nw_bait_pos_close.rotated(deg_to_rad(T2_ROTATION_CCW[arena_rotation_deg])))
+
+
+## 42.1
+# Move T2 out for bait, flip side if he's swapped. This timing is really tight without giving the bot sprint.
+# Timing here is cheated a bit early to give tank a little more time to get out.
+# In game it should come out to about the same timing with the late snapshot on jump.
+func move_t2_out():
+	if cw_light:
+		if t2_swapped:
+			get_char("t2").move_to(t2_nw_bait_pos.rotated(deg_to_rad(T2_ROTATION_CW[arena_rotation_deg] + 180)))
+		else:
+			get_char("t2").move_to(t2_nw_bait_pos.rotated(deg_to_rad(T2_ROTATION_CW[arena_rotation_deg])))
+	else:
+		if t2_swapped:
+			get_char("t2").move_to(t2_nw_bait_pos.rotated(deg_to_rad(T2_ROTATION_CCW[arena_rotation_deg] + 180)))
+		else:
+			get_char("t2").move_to(t2_nw_bait_pos.rotated(deg_to_rad(T2_ROTATION_CCW[arena_rotation_deg])))
+
+
+## 43.5
+# Sixth Apoc hit
+
+## 44.1
+# Start jump animation at farthest target
+# TEST: Might need to push timing later to account for late snapshot.
+func start_jump():
+	# Get jump target
+	jump_target = get_farthest_target()
+	# Jump
+	var target_pos: Vector3 = get_char(jump_target).global_position
+	# We only want to jump to around the edge of the boss' hitbox.
+	# If target is not far enough away, don't move.
+	if target_pos.length() < JUMP_BUFFER:
+		target_pos = target_pos.normalized() * 0.001
+	else:
+		target_pos = target_pos.normalized() * (target_pos.length() - JUMP_BUFFER)
+	boss.look_at(target_pos)
+	boss.rotation.y += deg_to_rad(90.0)
+	var tween : Tween = get_tree().create_tween()
+	tween.tween_property(boss, "global_position",
+		Vector3(target_pos.x, 0, target_pos.z), JUMP_DURATION)\
+		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+	oracle.play_flip_special()
+
+
+## 44.9
+# Jump hit
+func jump_hit():
+	var pc: PlayableCharacter = get_char(jump_target)
+	ground_aoe_controller.spawn_circle(v2(pc.global_position), JUMP_RADIUS,
+		JUMP_LIFETIME, JUMP_COLOR, [1, 1, "Darkest Dance (Oracle Jump)", [pc]])
+
+
+## 45.8
+# Start long lockon countdown
+func long_lock_cd():
+	start_lock_cd(LONG)
+
+
+## 45.9
+# Move to pre-kb position
+func move_pre_kb():
+	var flank_positions := get_oracle_flank_pos()
+	for key: String in party_keys_sa:
+		if key.contains("sup"):
+			get_char_sa(key).move_to(flank_positions[0])
+		else:
+			get_char_sa(key).move_to(flank_positions[1])
+
+
+## 47.1
+# Start KB anim
+func start_kb_anim():
+	pass
+
+## 47.6
+# Knockback
+func kb_hit():
+	var kb_source = v2(oracle.global_position)
+	for key in party:
+		get_char(key).knockback(KB_DIST, kb_source, KB_DURATION)
+
+
+## 50.9
+# Long Water hit
+func long_water_hit():
+	water_hit(LONG)
+
+
+## 51.2
+# Cast Shockwave Pulsar (4.7s)
+func cast_shockwave():
+	cast_bar.cast("Shockwave Pulsar", 4.7)
 
 
 ### END OF TIMELINE ###
@@ -460,98 +425,129 @@ func shell_crusher_hit() -> void:
 func instantiate_party(new_party: Dictionary) -> void:
 	# Standard role keys
 	party = new_party
-	valid_targets = party.values()
 	# NA Party setup
-	na_party_setup()
+	party_setup()
 	# Rotate arena
-	arena_rotation_deg = 45 * randi_range(0, 7)
-	# Need to invert this because .rotated is CW and .rotate_y is CCW :D
+	arena_rotation_deg = 45 * randi_range(0, 3)
+	assert(arena_rotation_deg in CW_ROTATION_MAP, "Invalid rotation value (needs to be int)")
+	# Need to invert this because .rotated is CW and .rotate_y is CCW
 	special_markers.rotate_y(deg_to_rad(arena_rotation_deg * -1))
-	# Randomize Ice role
-	dps_ice = randi() % 2 == 0
-	# Pick Unholy Darkness targets
-	for valid_keys: Array in valid_ud_keys:
-		var rand_key: String = valid_keys.pick_random()
-		# Avoid duplicate keys
-		while (ud_keys.has(rand_key)):
-			rand_key = valid_keys.pick_random()
-		ud_keys.append(rand_key)
-	# Randomize Hourglass rotations (0=cw, 1=ccw)
-	for key in hourglasses:
-		hourglass_rotations[key] = randi_range(0, 1)
+	# Randomize Apoc Light Rotation (0=cw, 1=ccw)
+	cw_light = randi() % 2 == 0
 
 
-func na_party_setup() -> void:
-	# Shuffle dps/sup roles
-	var shuffle_list := na_dps_prio.duplicate()
+func party_setup() -> void:
+	# Assign water debuffs
+	var debuff_lengths := [NONE, NONE, SHORT, SHORT, MED, MED, LONG, LONG]
+	var shuffle_list := party.keys()
+	assert(shuffle_list.size() == debuff_lengths.size(), "Array size mismatch.")
 	shuffle_list.shuffle()
-	
-	# Handle manual debuff selection for player
-	var supp_key  # Placeholder to use later if we need to swap a support key
-	if Global.p3_selected_debuff != 0:
-		var player_role_key = get_tree().get_first_node_in_group("player").get_role()
-		if Global.DPS_ROLE_KEYS.has(player_role_key):
-			# Remove player index and insert at selected key
-			shuffle_list.erase(player_role_key)
-			# For DPS need to convert 1,2,3 index to 3,2,1
-			shuffle_list.insert(abs(Global.p3_selected_debuff - 3), player_role_key)
+	# Used to find players by debuff duration.
+	var dps_debuff_lists := {NONE: [], SHORT: [], MED: [], LONG: []}
+	var sup_debuff_lists := {NONE: [], SHORT: [], MED: [], LONG: []}
+	for i in shuffle_list.size():
+		var key = shuffle_list[i]
+		var duration = debuff_lengths[i]
+		party_keys_debuffs[key] = duration
+		# Populate lists
+		if Global.DPS_ROLE_KEYS.has(key):
+			dps_debuff_lists[duration].append(key)
 		else:
-			supp_key = player_role_key
-	
-	# DPS assignments: 0=f3, 1= f2, 2=f1sw, 3=f1se
-	# Check if 2/3 are in prio order, otherwise swap them.
-	if na_dps_prio.find(shuffle_list[2]) > na_dps_prio.find(shuffle_list[3]):
-		shuffle_list.append(shuffle_list.pop_at(2))
-	# Add dps roles to dictionary
-	party_keys_ur["f3_dps"] = shuffle_list[0]
-	party_keys_ur["f2_dps"] = shuffle_list[1]
-	party_keys_ur["f1_dps_sw"] = shuffle_list[2]
-	party_keys_ur["f1_dps_se"] = shuffle_list[3]
-	
-	# Repeat for supports. Supp assignments: 0=f1, 1=f2, 2=f3nw, 3=f3ne
-	shuffle_list = na_sup_prio.duplicate()
-	shuffle_list.shuffle()
-	
-	# Handle manual debuff selection for player
-	if supp_key:  # Should only be true if random is not selected and player is a support
-		# Remove player index and insert at selected key
-		shuffle_list.erase(supp_key)
-		shuffle_list.insert(Global.p3_selected_debuff - 1, supp_key)
-	
-	if na_sup_prio.find(shuffle_list[2]) > na_sup_prio.find(shuffle_list[3]):
-		shuffle_list.append(shuffle_list.pop_at(2))
-	party_keys_ur["f1_sup"] = shuffle_list[0]
-	party_keys_ur["f2_sup"] = shuffle_list[1]
-	party_keys_ur["f3_sup_nw"] = shuffle_list[2]
-	party_keys_ur["f3_sup_ne"] = shuffle_list[3]
+			sup_debuff_lists[duration].append(key)
+		party_debuff_key_arr[duration].append(key)
+	# Check if swaps are needed.
+	var adjusters := {"dps": [], "sup": []}  # [role][array of swappers]
+	# DPS
+	for key in dps_debuff_lists:
+		if dps_debuff_lists[key].size() > 1:
+			# Find which dps adjusts
+			if dps_adjust_prio.find(dps_debuff_lists[key][0]) < dps_adjust_prio.find(dps_debuff_lists[key][1]):
+				adjusters["dps"].append(dps_debuff_lists[key][0])
+			else:
+				adjusters["dps"].append(dps_debuff_lists[key][1])
+	# Supports
+	for key in sup_debuff_lists:
+		if sup_debuff_lists[key].size() > 1:
+			# Find which dps adjusts
+			if sup_adjust_prio.find(sup_debuff_lists[key][0]) < sup_adjust_prio.find(sup_debuff_lists[key][1]):
+				adjusters["sup"].append(sup_debuff_lists[key][0])
+			else:
+				adjusters["sup"].append(sup_debuff_lists[key][1])
+	# Handle swaps
+	assert(adjusters["dps"].size() == adjusters["sup"].size(), "Array size mismatch.")
+	if adjusters["sup"].has("t2"):
+		t2_swapped = true
+	while adjusters["dps"].size() > 0:
+		var dps_swap = adjusters["dps"].pop_front()
+		var sup_swap = adjusters["sup"].pop_front()
+		var sup_key = party_keys_sa.find_key(sup_swap)
+		party_keys_sa[party_keys_sa.find_key(dps_swap)] = sup_swap
+		party_keys_sa[sup_key] = dps_swap
 
 
-# Returns the PlayableCharacter for the assigned key.
-func get_ur_player(ur_key) -> PlayableCharacter:
-	return party[party_keys_ur[ur_key]]
+# Return CharacterBody given it's Apoc position key.
+func get_char(party_key) -> PlayableCharacter:
+	return party[party_key]
 
 
-# Moves given party of CharacterBodies to given positions, make sure keys match.
-func move_party(party_dict: Dictionary, pos: Dictionary) -> void:
+# Return CharacterBody given it's Apoc position key.
+func get_char_sa(sa_key) -> PlayableCharacter:
+	return party[party_keys_sa[sa_key]]
+
+
+# Moves Party based on standard role keys.
+func move_party(pos: Dictionary) -> void:
 	for key: String in pos:
-		var pc: PlayableCharacter = party_dict[key]
-		if pc.is_player() and !Global.spectate_mode:
-			continue
+		var pc := get_char(key)
 		pc.move_to(pos[key])
 
 
-# Moves UR Party to gives pos dictionary (must match UR keys). Also rotates positions by arena_rotation_deg.
-func move_party_ur_rotated(pos: Dictionary) -> void:
+# Moves Party based on standard role poskeys. Also rotates positions CW by rotation in deg.
+func move_party_rotated(pos: Dictionary, rotation: float) -> void:
 	for key: String in pos:
-		var pc: PlayableCharacter = get_ur_player(key)
-		if pc.is_player() and !Global.spectate_mode:
-			continue
-		pc.move_to(pos[key].rotated(deg_to_rad(arena_rotation_deg)))
+		var pc := get_char(key)
+		pc.move_to(pos[key].rotated(deg_to_rad(rotation)))
 
 
-func v2(v3: Vector3) -> Vector2:
-	return Vector2(v3.x, v3.z)
+# Moves Party based on Apoc position keys.
+func move_party_sa(pos: Dictionary) -> void:
+	for key: String in pos:
+		var pc: PlayableCharacter = get_char_sa(key)
+		pc.move_to(pos[key])
 
 
-func v3(v2: Vector2) -> Vector3:
-	return Vector3(v2.x, 0, v2.y)
+# Moves Party based on Apoc position keys. Also rotates positions CW by rotation in deg.
+func move_party_sa_rotated(pos: Dictionary, rotation: float) -> void:
+	for key: String in pos:
+		var pc: PlayableCharacter = get_char_sa(key)
+		pc.move_to(pos[key].rotated(deg_to_rad(rotation)))
+
+
+# Returns key of target farthest away from Oracle's position
+func get_farthest_target() -> String:
+	var oracle_pos = oracle.global_position
+	var farthest_key: String
+	var farthest_dist_sq := 0.0
+	for key in party:
+		var dist = get_char(key).global_position.distance_squared_to(oracle_pos)
+		if dist > farthest_dist_sq:
+			farthest_key = key
+			farthest_dist_sq = dist
+	assert(farthest_key, "Error finding farthest distance key.")
+	return farthest_key
+
+
+# Returns array of 2 vectors, back left and back right stack positions.
+func get_oracle_flank_pos() -> Array:
+	var oracle_pos := v2(oracle.global_position)
+	var back_left := oracle_pos - ((oracle_pos.normalized() * FLANK_STACK_DIST).rotated(deg_to_rad(30)))
+	var back_right := oracle_pos - ((oracle_pos.normalized() * FLANK_STACK_DIST).rotated(deg_to_rad(-30.0)))
+	return [back_left, back_right]
+
+
+func v2(vec3: Vector3) -> Vector2:
+	return Vector2(vec3.x, vec3.z)
+
+
+func v3(vec2: Vector2) -> Vector3:
+	return Vector3(vec2.x, 0, vec2.y)

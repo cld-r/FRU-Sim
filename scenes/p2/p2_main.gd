@@ -7,3 +7,7 @@
 ## that can be run back to back, or started from a specific point.
 
 extends Sequence
+
+
+func _on_puddles_select_button_pressed() -> void:
+	pass # Replace with function body.

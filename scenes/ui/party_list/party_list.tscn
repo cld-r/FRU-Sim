@@ -33,18 +33,18 @@ role_icons = {
 }
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
-anchors_preset = 6
-anchor_left = 1.0
+anchors_preset = 8
+anchor_left = 0.5
 anchor_top = 0.5
-anchor_right = 1.0
+anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -369.345
-offset_top = -151.15
-offset_right = -231.345
-offset_bottom = 150.85
-grow_horizontal = 0
+offset_left = 348.595
+offset_top = -184.095
+offset_right = 486.595
+offset_bottom = 117.905
+grow_horizontal = 2
 grow_vertical = 2
-scale = Vector2(1.25, 1.25)
+scale = Vector2(1.34, 1.34)
 mouse_filter = 2
 
 [node name="Label" type="Label" parent="MarginContainer"]
@@ -56,7 +56,7 @@ label_settings = SubResource("LabelSettings_j1ng4")
 
 [node name="ColorRect" type="ColorRect" parent="MarginContainer"]
 layout_mode = 2
-color = Color(0, 0, 0, 0.184314)
+color = Color(0, 0, 0, 0.092)
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
 custom_minimum_size = Vector2(110, 280)
