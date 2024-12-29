@@ -81,6 +81,7 @@ var strat: Strat
 var apoc_spread: Spread
 var t2_nw_bait_pos := Vector2(30, -30)
 var t2_nw_bait_pos_close := Vector2(10, -10)
+var t1_swapped := false
 var t2_swapped := false
 
 
@@ -347,16 +348,12 @@ func med_water_hit():
 
 ## 41.8
 func move_t2_short():
-	if cw_light:
-		if t2_swapped:
-			get_char("t2").move_to(t2_nw_bait_pos_close.rotated(deg_to_rad(T2_ROTATION_CW[arena_rotation_deg] + 180)))
-		else:
-			get_char("t2").move_to(t2_nw_bait_pos_close.rotated(deg_to_rad(T2_ROTATION_CW[arena_rotation_deg])))
-	else:
-		if t2_swapped:
-			get_char("t2").move_to(t2_nw_bait_pos_close.rotated(deg_to_rad(T2_ROTATION_CCW[arena_rotation_deg] + 180)))
-		else:
-			get_char("t2").move_to(t2_nw_bait_pos_close.rotated(deg_to_rad(T2_ROTATION_CCW[arena_rotation_deg])))
+	var tank_key = "t2" if strat == Strat.NAUR else "t1"
+	var rotation_dict = T2_ROTATION_CW if cw_light else T2_ROTATION_CCW
+	var rotation_offset := 0
+	if (strat == Strat.NAUR and t2_swapped) or (strat == Strat.LPDU and t1_swapped):
+		rotation_offset = 180
+	get_char(tank_key).move_to(t2_nw_bait_pos_close.rotated(deg_to_rad(rotation_dict[arena_rotation_deg] + rotation_offset)))
 
 
 ## 42.1
@@ -364,16 +361,12 @@ func move_t2_short():
 # Timing here is cheated a bit early to give tank a little more time to get out.
 # In game it should come out to about the same timing with the late snapshot on jump.
 func move_t2_out():
-	if cw_light:
-		if t2_swapped:
-			get_char("t2").move_to(t2_nw_bait_pos.rotated(deg_to_rad(T2_ROTATION_CW[arena_rotation_deg] + 180)))
-		else:
-			get_char("t2").move_to(t2_nw_bait_pos.rotated(deg_to_rad(T2_ROTATION_CW[arena_rotation_deg])))
-	else:
-		if t2_swapped:
-			get_char("t2").move_to(t2_nw_bait_pos.rotated(deg_to_rad(T2_ROTATION_CCW[arena_rotation_deg] + 180)))
-		else:
-			get_char("t2").move_to(t2_nw_bait_pos.rotated(deg_to_rad(T2_ROTATION_CCW[arena_rotation_deg])))
+	var tank_key = "t2" if strat == Strat.NAUR else "t1"
+	var rotation_dict = T2_ROTATION_CW if cw_light else T2_ROTATION_CCW
+	var rotation_offset := 0
+	if (strat == Strat.NAUR and t2_swapped) or (strat == Strat.LPDU and t1_swapped):
+		rotation_offset = 180
+	get_char(tank_key).move_to(t2_nw_bait_pos.rotated(deg_to_rad(rotation_dict[arena_rotation_deg] + rotation_offset)))
 
 
 ## 43.5
@@ -508,6 +501,8 @@ func party_setup() -> void:
 				adjusters["sup"].append(sup_debuff_lists[key][1])
 	# Handle swaps
 	assert(adjusters["dps"].size() == adjusters["sup"].size(), "Array size mismatch.")
+	if adjusters["sup"].has("t1"):
+		t1_swapped = true
 	if adjusters["sup"].has("t2"):
 		t2_swapped = true
 	while adjusters["dps"].size() > 0:
