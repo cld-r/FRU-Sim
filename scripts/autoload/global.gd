@@ -31,6 +31,9 @@ var spectate_mode := false
 # P2 Light Rampant
 var p2_force_puddles := false
 
+# P3 Apoc
+var p3_t1_bait := false
+
 # P3 Ultimate Relativity
 var p3_selected_debuff := 0  # [random, short, med, long]
 var p4_selected_debuff := 0  # [random, red/aero, red/ice, blue/eruption, blue/ice, blue,unholy, blue/water]

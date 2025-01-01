@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://scenes/p2/arena/large_orb.gd" id="1_r6gbg"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lv6lh"]
+resource_local_to_scene = true
 transparency = 1
 albedo_color = Color(0.670588, 0.717647, 0.776471, 0.498039)
 emission_enabled = true
@@ -10,15 +11,18 @@ emission = Color(0.40968, 0.464457, 0.532626, 1)
 emission_energy_multiplier = 1.15
 
 [sub_resource type="SphereMesh" id="SphereMesh_3tm1n"]
+resource_local_to_scene = true
 material = SubResource("StandardMaterial3D_lv6lh")
 radius = 3.6
 height = 7.2
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xgk38"]
+resource_local_to_scene = true
 transparency = 1
 albedo_color = Color(1, 0.643137, 0.227451, 0.129412)
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_l41w4"]
+resource_local_to_scene = true
 material = SubResource("StandardMaterial3D_xgk38")
 top_radius = 25.5
 bottom_radius = 25.5
@@ -76,6 +80,7 @@ tracks/3/keys = {
 }
 
 [sub_resource type="Animation" id="Animation_vdgjj"]
+resource_local_to_scene = true
 resource_name = "orb_grow_in"
 tracks/0/type = "value"
 tracks/0/imported = false
@@ -103,6 +108,7 @@ tracks/1/keys = {
 }
 
 [sub_resource type="Animation" id="Animation_iltl1"]
+resource_local_to_scene = true
 resource_name = "tele_grow_in"
 length = 0.25
 tracks/0/type = "value"

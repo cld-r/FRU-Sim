@@ -5,7 +5,7 @@
 
 extends Node
 
-enum Strat {NA, EU}
+enum Strat {NA, EU, ELE}
 
 # Debuff Icon Scenes
 const CHAINS_LOCKED = preload("res://scenes/ui/auras/debuff_icons/p2/chains_locked.tscn")
@@ -65,10 +65,12 @@ var support_keys := ["t2", "t1", "h2", "h1"]
 var dps_keys := ["r1", "r2", "m1", "m2"]
 var lr_north_lineup := ["t2", "t1", "h2", "h1"]
 var lr_south_lineup := ["r1", "r2", "m1", "m2"]
+var lr_south_lineup_ele := ["m1", "m2", "r1", "r2"]
 var orb_keys := []
 var spread_keys := []
 var na_we_spread_prio := [4, 3, 5, 2, 6, 1, 7, 0] # W > E Prio [r1, h1, r2, h2, m1, t1, m2, t2]
 var eu_ns_spread_prio := [3, 2, 1, 0, 4, 5, 6, 7] # N > S Prio [h1, h2, t1, t2, r1, r2, m1, m2]
+#var ele_we_spread_prio := [6, 3, 7, 2, 4, 1, 5, 0] # W > E Prio [m1, h1, m2, h2, r1, t1, r2, t2]
 # Will be randomized. First 4 get 1 stacks of debuff, last 4 are quad tower soakers.
 var lightsteeped_keys := ["t2", "t1", "h2", "h1", "r1", "r2", "m1", "m2"]
 var solo_tower_positions := [Vector2(19, -32.8), Vector2(37.7, 0), Vector2(19, 32.8),
@@ -107,7 +109,10 @@ func cast_lr() -> void:
 
 
 func move_pre_pos() -> void:
-	move_party(party, LRPosNA.pre_pos_44)
+	if strat == Strat.ELE:
+		move_party(party, LRPosNA.pre_pos_44_ele)
+	else:
+		move_party(party, LRPosNA.pre_pos_44)
 
 ## 08.00
 # Finish cast animation.
@@ -143,7 +148,7 @@ func assing_debuffs() -> void:
 ## 09.75
 # Spread markers move.
 func move_puddles_tower_lineup() -> void:
-	if strat == Strat.NA:
+	if strat == Strat.NA or strat == Strat.ELE:
 		party[lr_party["n_puddle"]].move_to(LRPosNA.tower_lineup["n_puddle"])
 		party[lr_party["s_puddle"]].move_to(LRPosNA.tower_lineup["s_puddle"])
 	else: 
@@ -153,7 +158,7 @@ func move_puddles_tower_lineup() -> void:
 ## 10.75
 # Chains first move.
 func move_tower_lineup() -> void:
-	if strat == Strat.NA:
+	if strat == Strat.NA or strat == Strat.ELE:
 		move_lr_party(LRPosNA.tower_lineup)
 	else:
 		move_lr_party(LRPosEU.tower_lineup)
@@ -171,7 +176,7 @@ func spawn_solo_towers() -> void:
 ## 12.75
 # Chains move to towers.
 func move_tower_soak():
-	if strat == Strat.NA:
+	if strat == Strat.NA  or strat == Strat.ELE:
 		move_lr_party(LRPosNA.tower_soak)
 	else:
 		move_lr_party(LRPosEU.tower_soak)
@@ -190,7 +195,7 @@ func first_puddle_snapshot() -> void:
 	# Spawn first AoE
 	drop_puddles()
 	# Move spread players
-	if strat == Strat.NA:
+	if strat == Strat.NA  or strat == Strat.ELE:
 		move_lr_party(LRPosNA.puddle_dodge_1)
 	else:
 		move_lr_party(LRPosEU.puddle_dodge_1)
@@ -200,7 +205,7 @@ func first_puddle_snapshot() -> void:
 # Second puddle snapshot
 func second_puddle_snapshot() -> void:
 	drop_puddles()
-	if strat == Strat.NA:
+	if strat == Strat.NA  or strat == Strat.ELE:
 		move_lr_party(LRPosNA.puddle_dodge_2)
 	else:
 		move_lr_party(LRPosEU.puddle_dodge_2)
@@ -210,7 +215,7 @@ func second_puddle_snapshot() -> void:
 # Third puddle snapshot
 func third_puddle_snapshot() -> void:
 	drop_puddles()
-	if strat == Strat.NA:
+	if strat == Strat.NA  or strat == Strat.ELE:
 		move_lr_party(LRPosNA.puddle_dodge_3)
 	else:
 		move_lr_party(LRPosEU.puddle_dodge_3)
@@ -236,7 +241,7 @@ func towers_snapshot() -> void:
 # Move soakers to N/S
 # Spawn first orb trio
 func move_post_tower() -> void:
-	if strat == Strat.NA:
+	if strat == Strat.NA or strat == Strat.ELE:
 		move_lr_party(LRPosNA.post_tower)
 	else:
 		move_lr_party(LRPosEU.post_tower)
@@ -258,7 +263,7 @@ func first_orbs_spawn () -> void:
 # Forth puddle snapshot
 func forth_puddle_snapshot() -> void:
 	drop_puddles()
-	if strat == Strat.NA:
+	if strat == Strat.NA or strat == Strat.ELE:
 		move_lr_party(LRPosNA.puddle_dodge_4)
 	else:
 		move_lr_party(LRPosEU.puddle_dodge_4)
@@ -269,7 +274,7 @@ func forth_puddle_snapshot() -> void:
 # First orb telegraph (grow in)
 func fifth_puddle_snapshot() -> void:
 	drop_puddles()
-	if strat == Strat.NA:
+	if strat == Strat.NA or strat == Strat.ELE:
 		move_lr_party(LRPosNA.puddle_dodge_5)
 	else:
 		move_lr_party(LRPosEU.puddle_dodge_5)
@@ -277,8 +282,6 @@ func fifth_puddle_snapshot() -> void:
 
 
 func first_orbs_telegraph () -> void:
-	# Randomize orb patter
-	n_orb_pattern = randi() % 2 == 0
 	if n_orb_pattern:
 		for orb: P2LargeOrb in n_orb_list:
 			orb.play_tele_spawn()
@@ -300,7 +303,7 @@ func second_orbs_spawn () -> void:
 
 # Intermediate dodge to simulate slower movement leading up to shared hit
 func move_to_intermediate_spot() -> void:
-	if strat == Strat.NA:
+	if strat == Strat.NA or strat == Strat.ELE:
 		move_lr_party(LRPosNA.inter_dodge)
 	else:
 		move_lr_party(LRPosEU.inter_dodge)
@@ -310,7 +313,7 @@ func move_to_intermediate_spot() -> void:
 ## 24.50
 # Move groups to first safe spot
 func move_safe_spot_1() -> void:
-	if strat == Strat.NA:
+	if strat == Strat.NA  or strat == Strat.ELE:
 		if n_orb_pattern:
 			move_lr_party(LRPosNA.north_orb_first_dodge)
 		else:
@@ -370,7 +373,7 @@ func first_orbs_hit() -> void:
 # Move group to second safe spot
 # Remove chains
 func move_safe_spot_2() -> void:
-	if strat == Strat.NA:
+	if strat == Strat.NA or strat == Strat.ELE:
 		if n_orb_pattern:
 			move_lr_party(LRPosNA.north_orb_second_dodge)
 		else:
@@ -399,7 +402,7 @@ func second_orbs_hit() -> void:
 
 
 func move_middle_safe_spot() -> void:
-	if strat == Strat.NA:
+	if strat == Strat.NA or strat == Strat.ELE:
 		if n_orb_pattern:
 			move_lr_party(LRPosNA.n_pattern_middle_dodge)
 		else:
@@ -502,8 +505,15 @@ func instantiate_party(new_party: Dictionary) -> void:
 
 
 func four_four_party_setup() -> void:
+	var spread_prio
+	if strat == Strat.NA:
+		spread_prio = na_we_spread_prio
+	elif strat == Strat.EU:
+		spread_prio = eu_ns_spread_prio
+	elif strat == Strat.ELE:
+		spread_prio = na_we_spread_prio
+		lr_south_lineup = lr_south_lineup_ele
 	# LR assigments: 2 puddles, 6 chains, 2 chained orbs
-	#var party_keys : Array = party.keys()
 	# Get 2 unique random keys
 	var spread_keys_index := []
 	# Manual puddle force by user.
@@ -517,13 +527,9 @@ func four_four_party_setup() -> void:
 		spread_keys_index.append(rand)
 	
 	# Order spread (puddle) based on north/south prio
-	# NA
-	if strat == Strat.NA:
-		if na_we_spread_prio.find(spread_keys_index[0]) > na_we_spread_prio.find(spread_keys_index[1]):
-			spread_keys_index.append(spread_keys_index.pop_at(0))
-	elif strat == Strat.EU:
-		if eu_ns_spread_prio.find(spread_keys_index[0]) > eu_ns_spread_prio.find(spread_keys_index[1]):
-			spread_keys_index.append(spread_keys_index.pop_at(0))
+	if spread_prio.find(spread_keys_index[0]) > spread_prio.find(spread_keys_index[1]):
+		spread_keys_index.append(spread_keys_index.pop_at(0))
+	
 	# Remove spread from lineups (0-3 is north, 4-7 is south)
 	for index in spread_keys_index:
 		if index < 4:
@@ -582,15 +588,11 @@ func drop_puddles() -> void:
 func move_party(party_dict: Dictionary, pos: Dictionary) -> void:
 	for key: String in pos:
 		var pc: PlayableCharacter = party_dict[key]
-		if pc.is_player() and !Global.spectate_mode:
-			continue
 		pc.move_to(pos[key])
 
 func move_lr_party(pos: Dictionary) -> void:
 	for key: String in pos:
 		var pc: PlayableCharacter = party[lr_party[key]]
-		if pc.is_player() and !Global.spectate_mode:
-			continue
 		pc.move_to(pos[key])
 
 func v2(v3: Vector3) -> Vector2:

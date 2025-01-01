@@ -9,6 +9,12 @@ static var pre_pos_44 := {
 	"m1": Vector2(-14.5, 4.5), "m2": Vector2(-11, 11), "r1": Vector2(-11, -11), "r2": Vector2(-14.5, -4.5)
 }
 
+# Pre-pos for 4/4 setup for Elemental
+static var pre_pos_44_ele := {
+	"t1": Vector2(14.5, 4.5), "t2": Vector2(11, 11), "h1": Vector2(11, -11), "h2": Vector2(14.5, -4.5),
+	"r1": Vector2(-14.5, 4.5), "r2": Vector2(-11, 11), "m1": Vector2(-11, -11), "m2": Vector2(-14.5, -4.5)
+}
+
 # Pre-pos for clock setup
 static var pre_pos_clock := {
 	"t1": Vector2(14.2, 0), "t2": Vector2(0, 14.2), "h1": Vector2(0, -14.2), "h2": Vector2(-14.2, 0),

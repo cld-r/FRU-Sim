@@ -348,10 +348,10 @@ func med_water_hit():
 
 ## 41.8
 func move_t2_short():
-	var tank_key = "t2" if strat == Strat.NAUR else "t1"
+	var tank_key = "t2" if !Global.p3_t1_bait else "t1"
 	var rotation_dict = T2_ROTATION_CW if cw_light else T2_ROTATION_CCW
 	var rotation_offset := 0
-	if (strat == Strat.NAUR and t2_swapped) or (strat == Strat.LPDU and t1_swapped):
+	if (!Global.p3_t1_bait and t2_swapped) or (Global.p3_t1_bait and t1_swapped):
 		rotation_offset = 180
 	get_char(tank_key).move_to(t2_nw_bait_pos_close.rotated(deg_to_rad(rotation_dict[arena_rotation_deg] + rotation_offset)))
 
@@ -361,10 +361,10 @@ func move_t2_short():
 # Timing here is cheated a bit early to give tank a little more time to get out.
 # In game it should come out to about the same timing with the late snapshot on jump.
 func move_t2_out():
-	var tank_key = "t2" if strat == Strat.NAUR else "t1"
+	var tank_key = "t2" if !Global.p3_t1_bait else "t1"
 	var rotation_dict = T2_ROTATION_CW if cw_light else T2_ROTATION_CCW
 	var rotation_offset := 0
-	if (strat == Strat.NAUR and t2_swapped) or (strat == Strat.LPDU and t1_swapped):
+	if (!Global.p3_t1_bait and t2_swapped) or (Global.p3_t1_bait and t1_swapped):
 		rotation_offset = 180
 	get_char(tank_key).move_to(t2_nw_bait_pos.rotated(deg_to_rad(rotation_dict[arena_rotation_deg] + rotation_offset)))
 

@@ -8,6 +8,7 @@ class_name Sequence
 
 @onready var party_controller : PartyController = $PartyController
 @onready var encounter_controller: Node = $EncounterController
+@onready var pause_menu: CanvasLayer = $PauseMenu
 
 
 func _ready() -> void:
