@@ -1,10 +1,12 @@
-# Copyright 2024 by William Craycroft
+# Copyright 2025
 # All rights reserved.
 # This file is released under "GNU General Public License 3.0".
 # Please see the LICENSE file that should have been included as part of this package.
 
 extends Node
 class_name GroundAoeController
+
+enum {CIRCLE, DONUT, LINE, TOWER, CONE, LR_TOWER}
 
 const CIRCLE_Y := 0.11
 const CONE_Y := 0.11
@@ -18,8 +20,8 @@ const DONUT_Y := 0.11
 	"line": "res://scenes/common/ground_markers/line_aoe.tscn",
 	"tower": "res://scenes/common/ground_markers/tower_aoe.tscn",
 	"cone": "res://scenes/common/ground_markers/cone_aoe.tscn",
-	"twister": "res://scenes/common/ground_markers/twister.tscn",
-	"ascalon": "res://scenes/common/ground_markers/ascalon_cone.tscn",
+	"twister": "",
+	"ascalon": "",
 	"lr_tower": "res://scenes/common/ground_markers/lr_tower_solo.tscn"
 }
 
@@ -155,20 +157,27 @@ fail_conditions: Array = [], check_at_end : bool = false) -> ConeAoe:
 	return new_cone
 
 
-func spawn_ascalon_cone(position: Vector2, target: Vector2, lifetime: float, 
-color: Color, fail_conditions: Array = []) -> AscalonCone:
-	# Load resource
-	if !ascalon_cone_scene:
-		if ResourceLoader.load_threaded_get_status(res_path["ascalon"]) == 0:
-			ResourceLoader.load_threaded_request(res_path["ascalon"])
-		ascalon_cone_scene = ResourceLoader.load_threaded_get(res_path["ascalon"])
-	# Spawn Ascalon Cone
-	var new_cone: AscalonCone = ascalon_cone_scene.instantiate()
-	marker_layer.add_child(new_cone)
-	new_cone.set_parameters(Vector3(position.x, 0, position.y), target, lifetime, color, fail_conditions)
-	new_cone.play_start_animation()
-	new_cone.await_collision()
-	return new_cone
+
+
+
+## Deprecated ##
+
+
+
+#func spawn_ascalon_cone(position: Vector2, target: Vector2, lifetime: float, 
+#color: Color, fail_conditions: Array = []) -> AscalonCone:
+	## Load resource
+	#if !ascalon_cone_scene:
+		#if ResourceLoader.load_threaded_get_status(res_path["ascalon"]) == 0:
+			#ResourceLoader.load_threaded_request(res_path["ascalon"])
+		#ascalon_cone_scene = ResourceLoader.load_threaded_get(res_path["ascalon"])
+	## Spawn Ascalon Cone
+	#var new_cone: AscalonCone = ascalon_cone_scene.instantiate()
+	#marker_layer.add_child(new_cone)
+	#new_cone.set_parameters(Vector3(position.x, 0, position.y), target, lifetime, color, fail_conditions)
+	#new_cone.play_start_animation()
+	#new_cone.await_collision()
+	#return new_cone
 
 
 #func spawn_twister(position: Vector2, lifetime: float, fail_conditions: Array = []) -> Twister:
@@ -183,9 +192,6 @@ color: Color, fail_conditions: Array = []) -> AscalonCone:
 	#new_twister.set_parameters(Vector3(position.x, 0, position.y), lifetime, fail_conditions)
 	#return new_twister
 
-
-
-## Deprecated
 
 # Returns array of CharacterBody3D's hit by AoE
 #func spawn_circle_with_hitbox(position: Vector2, radius: float, lifetime: float, color: Color) -> Array:

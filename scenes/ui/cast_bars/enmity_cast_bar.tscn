@@ -1,0 +1,29 @@
+[gd_scene load_steps=2 format=3 uid="uid://cjmyec6sin7kw"]
+
+[ext_resource type="Script" path="res://scenes/ui/cast_bars/enmity_cast_bar.gd" id="1_iy7ye"]
+
+[node name="EnmityCastBar" type="CanvasLayer" groups=["clone_cast_bar"]]
+script = ExtResource("1_iy7ye")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+anchors_preset = -1
+anchor_left = 0.095
+anchor_top = 0.711
+anchor_right = 0.095
+anchor_bottom = 0.711
+offset_left = 85.4
+offset_top = 22.0799
+offset_right = 336.4
+offset_bottom = 120.08
+grow_vertical = 2
+scale = Vector2(0.85, 0.85)
+size_flags_vertical = 8
+mouse_filter = 2
+theme_override_constants/margin_left = 21
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
+
+[node name="CastBarContainer" type="VBoxContainer" parent="MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2

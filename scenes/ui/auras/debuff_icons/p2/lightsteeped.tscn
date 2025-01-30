@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dfl1fkdqwyuum"]
 
-[ext_resource type="Texture2D" uid="uid://c7u5xj2yo4q50" path="res://assets/common/icons/debuff_icons/lightsteeped.png" id="1_ycs0b"]
+[ext_resource type="Texture2D" uid="uid://c7u5xj2yo4q50" path="res://assets/common/icons/debuff_icons/light_rampant/lightsteeped.png" id="1_ycs0b"]
 
 [node name="LightsteepedIcon" type="TextureRect"]
 size_flags_horizontal = 8

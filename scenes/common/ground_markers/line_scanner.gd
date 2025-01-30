@@ -1,3 +1,8 @@
+# Copyright 2025
+# All rights reserved.
+# This file is released under "GNU General Public License 3.0".
+# Please see the LICENSE file that should have been included as part of this package.
+
 # This node will scan for other Area3D's on mask layer 11, and return an array with the first area hit at the front.
 # This is used mainly for Wild Charge style mechanics where you need to determine the nearest target in a line.
 

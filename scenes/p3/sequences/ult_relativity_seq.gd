@@ -5,6 +5,8 @@
 
 extends Node
 
+enum Strat {NA, EU, GREY}
+
 # Debuff Icon Scenes
 const STUN_ICON = preload("res://scenes/ui/auras/debuff_icons/common/stun_icon.tscn")
 const DARK_BLIZZARD_ICON = preload("res://scenes/ui/auras/debuff_icons/p3/dark_blizzard_icon.tscn")
@@ -12,6 +14,7 @@ const DARK_ERUPTION = preload("res://scenes/ui/auras/debuff_icons/p3/dark_erupti
 const DARK_FIRE_ICON = preload("res://scenes/ui/auras/debuff_icons/p3/dark_fire_icon.tscn")
 const DARK_WATER_ICON = preload("res://scenes/ui/auras/debuff_icons/p3/dark_water_icon.tscn")
 const RETURN_ICON = preload("res://scenes/ui/auras/debuff_icons/p3/return_icon.tscn")
+const RETURN_ICON_2 = preload("res://scenes/ui/auras/debuff_icons/p3/return_icon_2.tscn")
 const SHADOWEYE_ICON = preload("res://scenes/ui/auras/debuff_icons/p3/shadoweye_icon.tscn")
 const UNHOLY_DARKNESS_ICON = preload("res://scenes/ui/auras/debuff_icons/p3/unholy_darkness_icon.tscn")
 const REWIND_MARKER = preload("res://scenes/p3/arena/rewind_marker.tscn")
@@ -52,6 +55,8 @@ var na_dps_prio := ["r2", "r1", "m1", "m2"]
 var na_sup_prio := ["h2", "h1", "t1", "t2"]
 var eu_dps_prio := ["r1", "m1", "m2", "r2"]
 var eu_sup_prio := ["h1", "t1", "t2", "h2"]
+var grey_dps_prio := ["r2", "m2", "m1", "r1"]
+var grey_sup_prio := ["h2", "t2", "t1", "h1"]
 var party_keys_ur := {
 	"f1_dps_sw": "", "f1_dps_se": "", "f1_sup": "",
 	"f2_dps": "", "f2_sup": "",
@@ -223,8 +228,10 @@ func move_first_bait() -> void:
 # Start first hourglass line AoE's.
 func first_rewind_snapshot() -> void:
 	# Snapshot rewinds
-	rewind_snapshot(["f1_dps_sw", "f1_dps_se", "f2_dps", "f1_sup", "f2_sup"])
-
+	var first_rewinds := ["f1_dps_sw", "f1_dps_se", "f2_dps", "f1_sup", "f2_sup"]
+	rewind_snapshot(first_rewinds)
+	for key in first_rewinds:
+		get_ur_player(key).add_debuff(RETURN_ICON_2, 23)
 
 func rewind_snapshot(rewind_keys: Array) -> void:
 	rewind_ground_markers = []
@@ -304,7 +311,10 @@ func move_second_bait() -> void:
 # Spawn rewind ground markers.
 # Start hourglass line AoE's.
 func second_rewind_snapshot() -> void:
-	rewind_snapshot(["f3_sup_nw", "f3_sup_ne", "f3_dps"])
+	var second_rewinds := ["f3_sup_nw", "f3_sup_ne", "f3_dps"]
+	rewind_snapshot(second_rewinds)
+	for key in second_rewinds:
+		get_ur_player(key).add_debuff(RETURN_ICON_2, 13)
 
 
 ## 38.7
@@ -487,12 +497,15 @@ func party_setup() -> void:
 	var sup_prio: Array
 	
 	var selected_strat = SavedVariables.save_data["settings"]["p3_ur_strat"]
-	if selected_strat == 0:
+	if selected_strat == Strat.NA:
 		dps_prio = na_dps_prio.duplicate()
 		sup_prio = na_sup_prio.duplicate()
-	elif selected_strat == 1:
+	elif selected_strat == Strat.EU:
 		dps_prio = eu_dps_prio.duplicate()
 		sup_prio = eu_sup_prio.duplicate()
+	elif selected_strat == Strat.GREY:
+		dps_prio = grey_dps_prio.duplicate()
+		sup_prio = grey_sup_prio.duplicate()
 	else:
 		# If user changes saved_variable to something invalid, reset it.
 		GameEvents.emit_variable_saved("settings", "p3_ur_strat", 0)
@@ -541,6 +554,12 @@ func party_setup() -> void:
 	party_keys_ur["f2_sup"] = shuffle_list[1]
 	party_keys_ur["f3_sup_nw"] = shuffle_list[2]
 	party_keys_ur["f3_sup_ne"] = shuffle_list[3]
+	
+	# If Grey-9 strat, we need to swap E/W 20s fires.
+	if selected_strat == Strat.GREY:
+		var tmp = party_keys_ur["f2_sup"]
+		party_keys_ur["f2_sup"] = party_keys_ur["f2_dps"]
+		party_keys_ur["f2_dps"] = tmp
 
 
 # Returns the PlayableCharacter for the assigned key.
@@ -566,9 +585,9 @@ func move_party_ur_rotated(pos: Dictionary) -> void:
 		pc.move_to(pos[key].rotated(deg_to_rad(arena_rotation_deg)))
 
 
-func v2(v3: Vector3) -> Vector2:
-	return Vector2(v3.x, v3.z)
+func v2(vec3: Vector3) -> Vector2:
+	return Vector2(vec3.x, vec3.z)
 
 
-func v3(v2: Vector2) -> Vector3:
-	return Vector3(v2.x, 0, v2.y)
+func v3(vec2: Vector2) -> Vector3:
+	return Vector3(vec2.x, 0, vec2.y)

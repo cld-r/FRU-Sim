@@ -560,7 +560,7 @@ func four_four_party_setup() -> void:
 	# Loop around 0 and 5
 	if orb_index_2 > 5:
 		orb_index_2 = 0
-	elif orb_index_2 < 1:
+	elif orb_index_2 < 0:
 		orb_index_2 = 5
 	orb_keys = [valid_orb_keys[orb_index_1], valid_orb_keys[orb_index_2]]
 

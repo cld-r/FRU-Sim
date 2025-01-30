@@ -1,4 +1,4 @@
-# Copyright 2024 by William Craycroft
+# Copyright 2025
 # All rights reserved.
 # This file is released under "GNU General Public License 3.0".
 # Please see the LICENSE file that should have been included as part of this package.
@@ -163,7 +163,9 @@ func _move_to_target() -> void:
 	velocity.x = dir.x * move_speed
 	velocity.z = dir.z * move_speed
 	if velocity != Vector3.ZERO:
+		var tmp = model.scale
 		model.basis = model.basis.orthonormalized().slerp(Basis.looking_at(velocity), 0.05)
+		model.scale = tmp
 		#model.basis = Basis.looking_at(velocity)
 	var vl := velocity * transform.basis
 	if xiv_model:
@@ -211,7 +213,6 @@ func get_arrow_vector(length: float, arrow: String) -> Vector3:
 func look_at_direction(direction: Vector3) -> void:
 	if is_player_character and !spectate_mode:
 		return
-	
 	var look_target := (global_position.direction_to(direction) * 100) + global_position
 	look_target.y = 0
 	model.look_at(look_target)

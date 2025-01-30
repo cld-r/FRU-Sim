@@ -1,4 +1,9 @@
-# Used for storing character positions for Crystallize Time sequence
+# Copyright 2025
+# All rights reserved.
+# This file is released under "GNU General Public License 3.0".
+# Please see the LICENSE file that should have been included as part of this package.
+
+# Used for storing bot positions for Crystallize Time sequence
 
 extends Node
 
@@ -20,50 +25,51 @@ const AERO_TARGET := Vector2(35.9, 20.3)
 const AERO_SOURCE := Vector2(39.6, 22.8)
 const EARLY_SOAK := Vector2(24.2, 16.77)
 const NS_EXA_DODGE := Vector2(38.9, 4.0)
+const POST_EXA := Vector2(27.1, 19.1)
 
 # Rewind positions
-const G1_TANK_NE := Vector2(28.3, 18.9)
-const G1_PARTY_NE := Vector2(23.4, 16.8)
-const G2_TANK_NE := Vector2(18.9, 28.3)
-const G2_PARTY_NE := Vector2(16.8, 23.4)
+const G1_TANK_NE := Vector2(22.7, 18.2)
+const G1_PARTY_NE := Vector2(20.5, 15.4)
+const G2_TANK_NE := Vector2(18.2, 22.7)
+const G2_PARTY_NE := Vector2(15.4, 20.5)
 
-const G1_TANK_NW := Vector2(18.9, -28.3)
-const G1_PARTY_NW := Vector2(16.8, -23.4)
-const G2_TANK_NW := Vector2(28.3, -18.9)
-const G2_PARTY_NW := Vector2(23.4, -16.8)
+const G1_TANK_NW := Vector2(18.2, -22.7)
+const G1_PARTY_NW := Vector2(15.4, -20.5)
+const G2_TANK_NW := Vector2(22.7, -18.2)
+const G2_PARTY_NW := Vector2(20.5, -15.4)
 
-const G1_TANK_SE := Vector2(-18.9, 28.3)
-const G1_PARTY_SE := Vector2(-16.8, 23.4)
-const G2_TANK_SE := Vector2(-28.3, 18.9)
-const G2_PARTY_SE := Vector2(-23.4, 16.8)
+const G1_TANK_SE := Vector2(-18.2, 22.7)
+const G1_PARTY_SE := Vector2(-15.4, 20.5)
+const G2_TANK_SE := Vector2(-22.7, 18.2)
+const G2_PARTY_SE := Vector2(-20.5, 15.4)
 
-const G1_TANK_SW := Vector2(-28.3, -18.9)
-const G1_PARTY_SW := Vector2(-23.4, -16.8)
-const G2_TANK_SW := Vector2(-18.9, -28.3)
-const G2_PARTY_SW := Vector2(-16.8, -23.4)
+const G1_TANK_SW := Vector2(-22.7, -18.2)
+const G1_PARTY_SW := Vector2(-20.5, -15.4)
+const G2_TANK_SW := Vector2(-18.2, -22.7)
+const G2_PARTY_SW := Vector2(-15.4, -20.5)
 
 #const SE_ROTATION := deg_to_rad(90.0)
 #const SW_ROTATION := deg_to_rad(180.0)
 #const NW_ROTATION := deg_to_rad(270.0)
 
 # Jump spread positions
-const T1_SPREAD_NE := Vector2(36.8, 25.9)
-const T2_SPREAD_NE := Vector2(20, 40)
-const H1_SPREAD_NE := Vector2(24.0, 14.0)
-const H2_SPREAD_NE := Vector2(5.8, 28.4)
-const M1_SPREAD_NE := Vector2(13, -3)
-const M2_SPREAD_NE := Vector2(-3, 13)
-const R1_SPREAD_NE := Vector2(20, -19)
-const R2_SPREAD_NE := Vector2(-19, 20)
+const T1_SPREAD_NE := Vector2(37.3, 24.1)
+const T2_SPREAD_NE := Vector2(18, 40)
+const H1_SPREAD_NE := Vector2(14.1, 0)
+const H2_SPREAD_NE := Vector2(0, 14.1)
+const M1_SPREAD_NE := Vector2(7.3, -19.5)
+const M2_SPREAD_NE := Vector2(-19.5, 7.3)
+const R1_SPREAD_NE := Vector2(29, -29)
+const R2_SPREAD_NE := Vector2(-29, 29)
 
-const T1_SPREAD_NW := Vector2(20, -40)
-const T2_SPREAD_NW := Vector2(36.8, -25.9)
-const H1_SPREAD_NW := Vector2(5.8, -28.4)
-const H2_SPREAD_NW := Vector2(24.0, -14.0)
-const M1_SPREAD_NW := Vector2(-3, -13)
-const M2_SPREAD_NW := Vector2(13, 3)
-const R1_SPREAD_NW := Vector2(-19, -20)
-const R2_SPREAD_NW := Vector2(20, 19)
+const T1_SPREAD_NW := Vector2(18, -40)
+const T2_SPREAD_NW := Vector2(37.3, -24.1)
+const H1_SPREAD_NW := Vector2(0, -14.1)
+const H2_SPREAD_NW := Vector2(14.1, 0)
+const M1_SPREAD_NW := Vector2(-19.5, -7.3)
+const M2_SPREAD_NW := Vector2(7.3, 19.5)
+const R1_SPREAD_NW := Vector2(-29, -29)
+const R2_SPREAD_NW := Vector2(29, 29)
 
 # Akh Morn
 const AM_STACK_LEFT := Vector2(8, 0)
@@ -189,65 +195,57 @@ const POST_EXA_3_NE := {
 	"r_aero_sw": Vector2(21.5, 12), "r_aero_se": Vector2(21.5, 12) + RS1,
 	"r_ice_w": Vector2(21.5, 12) + RS2, "r_ice_e": Vector2(21.5, 12) + RS3,
 	"b_erupt": Vector2(22.3, -11.4), "b_ice": "r_aero_sw",
-	#"b_ud": Vector2(22.3, 17.4)
 }
 const POST_EXA_3_NW := {
 	"r_aero_sw": Vector2(21.5, -12), "r_aero_se": Vector2(21.5, -12) + RS1,
 	"r_ice_w": Vector2(21.5, -12) + RS2, "r_ice_e": Vector2(21.5, -12) + RS3,
-	#"b_erupt": Vector2(22.3, -17.4),
 	"b_ud": Vector2(22.3, 11.4), "b_water": "r_aero_se"
 }
 const POST_EXA_3_SE := {
 	"r_aero_sw": Vector2(-21.5, 12), "r_aero_se": Vector2(-21.5, 12) + RS1,
 	"r_ice_w": Vector2(-21.5, 12) + RS2, "r_ice_e": Vector2(-21.5, 12) + RS3,
 	"b_erupt": Vector2(-22.3, -11.4), "b_ice": "r_aero_sw",
-	#"b_ud": Vector2(-22.3, 11.4)
 }
 const POST_EXA_3_SW := {
 	"r_aero_sw": Vector2(-21.5, -12), "r_aero_se": Vector2(-21.5, -12) + RS1,
 	"r_ice_w": Vector2(-21.5, -12) + RS2, "r_ice_e": Vector2(-21.5, -12) + RS3,
-	#"b_erupt": Vector2(-22.3, -17.4), 
 	"b_ud": Vector2(-22.3, 17.4), "b_water": "r_aero_se"
 }
 
 
 const POST_EXA_4_REF := [POST_EXA_4_NW, POST_EXA_4_NE, POST_EXA_4_SE, POST_EXA_4_SW]
 const POST_EXA_4_NE := {
-	"r_aero_sw": G1_TANK_NE, "r_aero_se": G1_TANK_NE + RS1,
-	"r_ice_w": G1_TANK_NE + RS2, "r_ice_e": G1_TANK_NE + RS3,
-	"b_erupt": G1_TANK_NE - RS1, "b_ice": Vector2(-2, 2),
-	"b_ud": G1_TANK_NE - RS2
-	#"b_water": Vector2(-2, 20)
+	"r_aero_sw": POST_EXA * NE, "r_aero_se": POST_EXA * NE + RS1,
+	"r_ice_w": POST_EXA * NE + RS2, "r_ice_e": POST_EXA * NE + RS3,
+	"b_erupt": POST_EXA * NE - RS1, "b_ice": Vector2(-2, 2),
+	"b_ud": POST_EXA * NE - RS2
 }
 const POST_EXA_4_NW := {
-	"r_aero_sw": G2_TANK_NW, "r_aero_se": G2_TANK_NW + RS1,
-	"r_ice_w": G2_TANK_NW + RS2, "r_ice_e": G2_TANK_NW + RS3,
-	"b_erupt": G2_TANK_NW - RS1,
-	"b_ud": G2_TANK_NW - RS2, "b_water": Vector2(-2, -2)
-	#"b_ice": Vector2(-2, -20)
+	"r_aero_sw": POST_EXA * NW, "r_aero_se": POST_EXA * NW + RS1,
+	"r_ice_w": POST_EXA * NW + RS2, "r_ice_e": POST_EXA * NW + RS3,
+	"b_erupt": POST_EXA * NW - RS1,
+	"b_ud": POST_EXA * NW - RS2, "b_water": Vector2(-2, -2)
 }
 # Ice won't have soaked yet,
 const POST_EXA_4_SE := {
-	"r_aero_sw": G2_TANK_SE, "r_aero_se": G2_TANK_SE + RS1,
-	"r_ice_w": G2_TANK_SE + RS2, "r_ice_e": G2_TANK_SE + RS3,
-	"b_erupt": G2_TANK_SE - RS1,
-	"b_ud": G2_TANK_SE - RS2
-	#"b_water": Vector2(-33, 0)
+	"r_aero_sw": POST_EXA * SE, "r_aero_se": POST_EXA * SE + RS1,
+	"r_ice_w": POST_EXA * SE + RS2, "r_ice_e": POST_EXA * SE + RS3,
+	"b_erupt": POST_EXA * SE - RS1,
+	"b_ud": POST_EXA * SE - RS2
 }
 # Water won't have soaked yet.
 const POST_EXA_4_SW := {
-	"r_aero_sw": G1_TANK_SW, "r_aero_se": G1_TANK_SW + RS1,
-	"r_ice_w": G1_TANK_SW + RS2, "r_ice_e": G1_TANK_SW + RS3,
-	"b_erupt": G1_TANK_SW - RS1,
-	"b_ud": G1_TANK_SW - RS2
-	#"b_ice": Vector2(-33, 0)
+	"r_aero_sw": POST_EXA * SW, "r_aero_se": POST_EXA * SW + RS1,
+	"r_ice_w": POST_EXA * SW + RS2, "r_ice_e": POST_EXA * SW + RS3,
+	"b_erupt": POST_EXA * SW - RS1,
+	"b_ud": POST_EXA * SW - RS2
 }
 
 
 
-const POST_SOAK_TARGET_REF = [POST_SOAK_TARGET_NW, POST_SOAK_TARGET_NE, POST_SOAK_TARGET_SE, POST_SOAK_TARGET_SW]
 # This is to adjust SE/SW soakers if puddle is placed inside 4th exa
 # Ommitting far E/W soak because they need to wait for 3rd exa.
+const POST_SOAK_TARGET_REF = [POST_SOAK_TARGET_NW, POST_SOAK_TARGET_NE, POST_SOAK_TARGET_SE, POST_SOAK_TARGET_SW]
 const POST_SOAK_TARGET_NE := {
 	"b_ud": Vector2(22.3, 12.4),
 	"b_ice": Vector2(-2, 2),
@@ -260,16 +258,15 @@ const POST_SOAK_TARGET_NW := {
 }
 const POST_SOAK_TARGET_SE := {
 	"b_ud": Vector2(-22.3, 11.4),
-	"b_ice": G2_TANK_SE - RS3,
+	"b_ice": POST_EXA * SE - RS3,
 	"b_water": Vector2(-33, 0)
 }
 const POST_SOAK_TARGET_SW := {
 	"b_erupt": Vector2(-22.3, -12.4),
-	"b_water": G1_TANK_SW - RS3,
+	"b_water": POST_EXA * SW - RS3,
 	"b_ice": Vector2(-33, 0)
 }
-
-
+# Rewind Positions
 const REWIND_REF := [REWIND_NW, REWIND_NE, REWIND_SE, REWIND_SW]
 const REWIND_NE := {
 	"t1": G1_TANK_NE, "t2": G2_TANK_NE,
@@ -295,8 +292,6 @@ const REWIND_SW := {
 	"h1": G1_PARTY_SW + RS2, "h2": G2_PARTY_SW + RS2
 }
 
-
-#const JUMP_SPREAD_REF := [JUMP_SPREAD_NW, JUMP_SPREAD_NE, JUMP_SPREAD_SE, JUMP_SPREAD_SW]
 const JUMP_SPREAD_NE := {
 	"t1": T1_SPREAD_NE, "t2": T2_SPREAD_NE,
 	"m1": M1_SPREAD_NE, "m2": M2_SPREAD_NE, 
@@ -309,24 +304,6 @@ const JUMP_SPREAD_NW := {
 	"r1": R1_SPREAD_NW, "r2": R2_SPREAD_NW, 
 	"h1": H1_SPREAD_NW, "h2": H2_SPREAD_NW
 }
-#const JUMP_SPREAD_SE := {
-	#"t1": T1_SPREAD_NE, "t2": T2_SPREAD_NE,
-	#"m1": M1_SPREAD_NE, "m2": M2_SPREAD_NE, 
-	#"r1": R1_SPREAD_NE, "r2": R2_SPREAD_NE, 
-	#"h1": H1_SPREAD_NE, "h2": H2_SPREAD_NE
-#}
-#const JUMP_SPREAD_SW := {
-	#"t1": T1_SPREAD_NE, "t2": T2_SPREAD_NE,
-	#"m1": M1_SPREAD_NE, "m2": M2_SPREAD_NE, 
-	#"r1": R1_SPREAD_NE, "r2": R2_SPREAD_NE, 
-	#"h1": H1_SPREAD_NE, "h2": H2_SPREAD_NE
-#}
-#const JUMP_SPREAD_NW := {
-	#"t1": T1_SPREAD_NE, "t2": T2_SPREAD_NE,
-	#"m1": M1_SPREAD_NE, "m2": M2_SPREAD_NE, 
-	#"r1": R1_SPREAD_NE, "r2": R2_SPREAD_NE, 
-	#"h1": H1_SPREAD_NE, "h2": H2_SPREAD_NE
-#}
 
 const AKH_MORN := {
 	"t1": AM_STACK_LEFT, "t2": AM_STACK_RIGHT,

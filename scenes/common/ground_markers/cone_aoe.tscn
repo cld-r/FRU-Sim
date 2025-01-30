@@ -11,11 +11,11 @@ albedo_color = Color(1, 0.317647, 0.168627, 0.545098)
 resource_local_to_scene = true
 lightmap_size_hint = Vector2i(14, 21)
 material = SubResource("StandardMaterial3D_qhqjv")
-size = Vector3(1, 1, 0)
+size = Vector3(1, 1, 0.01)
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_6rsfs"]
 resource_local_to_scene = true
-points = PackedVector3Array(0, 0.5, 0, 0.5, -0.5, 0, 0, 0.5, 0.056, -0.5, -0.5, 0.054, 0.5, -0.5, 0.053, -0.5, -0.5, 0)
+points = PackedVector3Array(0, 0.5, 0, 0.5, -0.5, 0, 0, 0.5, 0.01, -0.5, -0.5, 0.01, 0.5, -0.5, 0.01, -0.5, -0.5, 0)
 
 [node name="ConeAoE" type="Area3D"]
 collision_layer = 0
@@ -27,7 +27,7 @@ transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 
 mesh = SubResource("PrismMesh_pji8d")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0.5)
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1000, 0, -1, -4.37114e-05, 0, 0, 0.5)
 shape = SubResource("ConvexPolygonShape3D_6rsfs")
 
 [connection signal="body_entered" from="." to="." method="_on_body_entered"]

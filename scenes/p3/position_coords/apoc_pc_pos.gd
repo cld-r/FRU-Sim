@@ -1,3 +1,8 @@
+# Copyright 2025
+# All rights reserved.
+# This file is released under "GNU General Public License 3.0".
+# Please see the LICENSE file that should have been included as part of this package.
+
 extends Node
 
 class_name ApocPos
@@ -44,19 +49,19 @@ const APOC_NEAR_INTER := Vector2(16.23, 16.23)
 const APOC_FAR := Vector2(44, 8)
 
 # Post Eruption
-const POST_ERUPT_NEAR := Vector2(8, 0)
+const POST_ERUPT_NEAR := Vector2(10, 0)
 const POST_ERUPT_FAR := Vector2(33, 0)
 
 
 # Initial role positions
-# Party keys, static rotation
+# Apoc keys, static rotation
 const ROLE_SETUP_NA := {
-	"t1": SETUP_NA_CLOSE * NW, "t2": SETUP_NA_CLOSE * SW, "h1": SETUP_NA_FAR * NW, "h2": SETUP_NA_FAR * SW,
-	"m1": SETUP_NA_CLOSE * SE, "m2": SETUP_NA_CLOSE * NE, "r1": SETUP_NA_FAR * SE, "r2": SETUP_NA_FAR * NE
+	"nl_sup": SETUP_NA_CLOSE * NW, "nr_sup": SETUP_NA_CLOSE * SW, "fl_sup": SETUP_NA_FAR * NW, "fr_sup": SETUP_NA_FAR * SW,
+	"nl_dps": SETUP_NA_CLOSE * SE, "nr_dps": SETUP_NA_CLOSE * NE, "fl_dps": SETUP_NA_FAR * SE, "fr_dps": SETUP_NA_FAR * NE
 }
 const ROLE_SETUP_EU := {
-	"t1": SETUP_EU_T1, "t2": SETUP_EU_T2, "h1": SETUP_EU_H1, "h2": SETUP_EU_H2,
-	"m1": SETUP_EU_M1, "m2": SETUP_EU_M2, "r1": SETUP_EU_R1, "r2": SETUP_EU_R2
+	"nl_sup": SETUP_EU_T1, "nr_sup": SETUP_EU_T2, "fl_sup": SETUP_EU_H1, "fr_sup": SETUP_EU_H2,
+	"nl_dps": SETUP_EU_M1, "nr_dps": SETUP_EU_M2, "fl_dps": SETUP_EU_R1, "fr_dps": SETUP_EU_R2
 }
 
 # Swap Positions

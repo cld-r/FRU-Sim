@@ -1,4 +1,4 @@
-# Copyright 2024 by William Craycroft
+# Copyright 2025
 # All rights reserved.
 # This file is released under "GNU General Public License 3.0".
 # Please see the LICENSE file that should have been included as part of this package.
@@ -37,4 +37,3 @@ func _on_default_button_pressed() -> void:
 func _on_back_button_pressed() -> void:
 	self.hide()
 	options_menu_container.show()
-

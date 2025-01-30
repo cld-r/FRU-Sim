@@ -1,4 +1,4 @@
-# Copyright 2025 by William Craycroft
+# Copyright 2025
 # All rights reserved.
 # This file is released under "GNU General Public License 3.0".
 # Please see the LICENSE file that should have been included as part of this package.
@@ -65,7 +65,6 @@ const AKH_MORN_LIFETIME := 0.3
 const AKH_MORN_LIGHT_COLOR := Color.GOLD
 const AKH_MORN_DARK_COLOR := Color.DARK_VIOLET
 
-
 const NA_WE_PRIO := ["h2", "h1", "t2", "t1", "m1", "m2", "r1", "r2"]
 const DEBUFF_ASSIGNMENTS := {
 	"r_aero_sw": {AERO_ICON: 14, WYRMCLAW_ICON: 40, RETURN_ICON: 33},
@@ -94,7 +93,6 @@ const ORACLE_POS := {
 	"final": Vector3(0, 0, 6), "final_rota": -45.0
 }
 
-
 @onready var crystal_time_anim: AnimationPlayer = %CrystalTimeAnim
 @onready var cast_bar: CastBar = %CastBar
 @onready var clone_cast_bar: CloneCastBar = %CloneCastBar
@@ -114,7 +112,6 @@ const ORACLE_POS := {
 	"n": %HourglassN, "nw": %HourglassNW, "ne": %HourglassNE,
 	"s": %HourglassS, "sw": %HourglassSW, "se": %HourglassSE, 
 }
-
 
 var party: Dictionary
 var party_ct := {

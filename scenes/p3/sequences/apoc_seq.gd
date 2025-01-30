@@ -6,7 +6,7 @@
 extends Node
 
 enum {NONE, SHORT, MED, LONG}  # Water debuff durations.
-enum Strat {NAUR, LPDU}
+enum Strat {NAUR, LPDU, MUR}
 enum Spread {STATIC, PERMA}   # Freepoc, Permaswap
 
 const DARK_WATER_ICON = preload("res://scenes/ui/auras/debuff_icons/p3/dark_water_icon.tscn")
@@ -14,7 +14,7 @@ const DARK_WATER_ICON = preload("res://scenes/ui/auras/debuff_icons/p3/dark_wate
 const SPIRIT_RADIUS := 10.0
 const SPIRIT_LIFETIME := 0.3
 const SPIRIT_COLOR := Color.REBECCA_PURPLE
-const WATER_RADIUS := 10.0
+const WATER_RADIUS := 15.5
 const WATER_LIFETIME := 0.4
 const WATER_COLOR := Color.DODGER_BLUE
 const ERUPTION_RADIUS := 15.0
@@ -38,10 +38,22 @@ const CCW_ROTATION_MAP := {0: -135, 45: -90, 90: -45, 135: 0}
 const T2_ROTATION_CW := {0: -45, 45: 0, 90: -135, 135: -90}
 const T2_ROTATION_CCW := {0: -45, 45: 0, 90: 45, 135: 90}
 
+# Base positions for NA and EU setups
 const PARTY_SA_STATIC := {
 	"nl_dps": "m1", "nr_dps": "m2", "fl_dps": "r1", "fr_dps": "r2",
 	"nl_sup": "t1", "nr_sup": "t2", "fl_sup": "h1", "fr_sup": "h2"
 }
+# Base positions for MUR setup (LPs). Don't change keys, DPS group = LP2, Sup = LP1.
+const PARTY_SA_STATIC_MUR := {
+	"nl_dps": "t2", "nr_dps": "m2", "fl_dps": "h2", "fr_dps": "r2",
+	"nl_sup": "t1", "nr_sup": "m1", "fl_sup": "h1", "fr_sup": "r1"
+}
+# Adjust prios for both NA and EU
+const DPS_ADJUST_PRIO_NA := ["m1", "m2", "r1", "r2"]
+const SUP_ADJUST_PRIO_NA := ["t1", "t2", "h1", "h2"]
+# Adjust prio for MUR (Panto prio)
+const DPS_ADJUST_PRIO_MUR := ["t2", "m2", "r2", "h2"] # LP2
+const SUP_ADJUST_PRIO_MUR := ["t1", "m1", "r1", "h1"] # LP1
 
 @onready var apoc_lights: ApocLights = %ApocLights
 @onready var apoc_anim: AnimationPlayer = %ApocAnim
@@ -56,9 +68,7 @@ const PARTY_SA_STATIC := {
 @onready var fail_list: FailList = %FailList
 
 var party: Dictionary
-# Adjust prios for both NA and EU
-var dps_adjust_prio := ["m1", "m2", "r1", "r2"]
-var sup_adjust_prio := ["t1", "t2", "h1", "h2"]
+
 # Square positions after adjust (near left/right, far left/right)
 var party_keys_sa := {
 	"nl_dps": "m1", "nr_dps": "m2", "fl_dps": "r1", "fr_dps": "r2",
@@ -83,6 +93,10 @@ var t2_nw_bait_pos := Vector2(30, -30)
 var t2_nw_bait_pos_close := Vector2(10, -10)
 var t1_swapped := false
 var t2_swapped := false
+var bait_tank_key: String
+var bait_rotation_dict: Dictionary
+var bait_rotation_offset: float
+var snap_jump_pos: Vector3
 
 
 func start_sequence(new_party: Dictionary) -> void:
@@ -92,7 +106,7 @@ func start_sequence(new_party: Dictionary) -> void:
 		LockonController.STACK_MARKER, LockonController.CD_COG])
 	# Get Strat.
 	strat = SavedVariables.save_data["settings"]["p3_sa_strat"]
-	if strat != Strat.NAUR and strat != Strat.LPDU:
+	if strat is not int or strat >= Strat.size() or strat < 0:
 		# Fix invalid SavedVariables, defaults to NA.
 		GameEvents.emit_variable_saved("settings", "p3_sa_strat", 0)
 		strat = Strat.NAUR
@@ -117,10 +131,10 @@ func cast_refrain():
 ## 2.2
 # Move to inital role positions.
 func move_to_setup():
-	if strat == Strat.NAUR:
-		move_party(ApocPos.ROLE_SETUP_NA)
+	if strat == Strat.NAUR or strat == Strat.MUR:
+		move_party_sa_static(ApocPos.ROLE_SETUP_NA)
 	else:
-		move_party(ApocPos.ROLE_SETUP_EU)
+		move_party_sa_static(ApocPos.ROLE_SETUP_EU)
 
 ## 3.8
 # Cast anim finish
@@ -173,7 +187,7 @@ func cast_apoc():
 ## 15.6
 # Make swaps if needed
 func move_to_swap_pos():
-	if strat == Strat.NAUR:
+	if strat == Strat.NAUR or strat == Strat.MUR:
 		move_party_sa(ApocPos.SWAP_SETUP_NA)
 	else:
 		move_party_sa(ApocPos.SWAP_SETUP_EU)
@@ -197,7 +211,7 @@ func start_lock_cd(duration):
 ## 20.2
 # Move to stack pos
 func move_stack_1():
-	if strat == Strat.NAUR:
+	if strat == Strat.NAUR or strat == Strat.MUR:
 		move_party_sa(ApocPos.STACK_1_NA)
 	else:
 		move_party_sa(ApocPos.STACK_1_EU)
@@ -231,7 +245,7 @@ func water_hit(duration: int):
 ## 23.8
 # Return to spread pos.
 func move_to_spread_pos():
-	if strat == Strat.NAUR:
+	if strat == Strat.NAUR  or strat == Strat.MUR:
 		move_party_sa(ApocPos.SPREAD_NA)
 	else:
 		move_party_sa(ApocPos.SPREAD_EU)
@@ -348,12 +362,16 @@ func med_water_hit():
 
 ## 41.8
 func move_t2_short():
-	var tank_key = "t2" if !Global.p3_t1_bait else "t1"
-	var rotation_dict = T2_ROTATION_CW if cw_light else T2_ROTATION_CCW
-	var rotation_offset := 0
+	bait_tank_key = "t2" if !Global.p3_t1_bait else "t1"
+	bait_rotation_dict = T2_ROTATION_CW if cw_light else T2_ROTATION_CCW
+	bait_rotation_offset = 0
+	# If tank swapped, send them to opposite side.
 	if (!Global.p3_t1_bait and t2_swapped) or (Global.p3_t1_bait and t1_swapped):
-		rotation_offset = 180
-	get_char(tank_key).move_to(t2_nw_bait_pos_close.rotated(deg_to_rad(rotation_dict[arena_rotation_deg] + rotation_offset)))
+		bait_rotation_offset += 180
+	# If MUR strat, account for T2 starting on East side.
+	if strat == Strat.MUR and !Global.p3_t1_bait:
+		bait_rotation_offset += 180
+	get_char(bait_tank_key).move_to(t2_nw_bait_pos_close.rotated(deg_to_rad(bait_rotation_dict[arena_rotation_deg] + bait_rotation_offset)))
 
 
 ## 42.1
@@ -361,13 +379,19 @@ func move_t2_short():
 # Timing here is cheated a bit early to give tank a little more time to get out.
 # In game it should come out to about the same timing with the late snapshot on jump.
 func move_t2_out():
-	var tank_key = "t2" if !Global.p3_t1_bait else "t1"
-	var rotation_dict = T2_ROTATION_CW if cw_light else T2_ROTATION_CCW
-	var rotation_offset := 0
-	if (!Global.p3_t1_bait and t2_swapped) or (Global.p3_t1_bait and t1_swapped):
-		rotation_offset = 180
-	get_char(tank_key).move_to(t2_nw_bait_pos.rotated(deg_to_rad(rotation_dict[arena_rotation_deg] + rotation_offset)))
+	#var tank_key = "t2" if !Global.p3_t1_bait else "t1"
+	#var rotation_dict = T2_ROTATION_CW if cw_light else T2_ROTATION_CCW
+	#var rotation_offset := 0
+	#if (!Global.p3_t1_bait and t2_swapped) or (Global.p3_t1_bait and t1_swapped):
+		#rotation_offset = 180
+	get_char(bait_tank_key).move_to(t2_nw_bait_pos.rotated(deg_to_rad(bait_rotation_dict[arena_rotation_deg] + bait_rotation_offset)))
 
+
+## 43.2
+# Snapshot Jump hit position
+func snapshot_jump():
+	jump_target = get_farthest_target()
+	snap_jump_pos = get_char(jump_target).global_position
 
 ## 43.5
 # Sixth Apoc hit
@@ -376,8 +400,8 @@ func move_t2_out():
 # Start jump animation at farthest target
 # TEST: Might need to push timing later to account for late snapshot.
 func start_jump():
-	# Get jump target
-	jump_target = get_farthest_target()
+	# Get jump target, this is done during snapshot
+	# jump_target = get_farthest_target()
 	# Jump
 	var target_pos: Vector3 = get_char(jump_target).global_position
 	# We only want to jump to around the edge of the boss' hitbox.
@@ -399,7 +423,7 @@ func start_jump():
 # Jump hit
 func jump_hit():
 	var pc: PlayableCharacter = get_char(jump_target)
-	ground_aoe_controller.spawn_circle(v2(pc.global_position), JUMP_RADIUS,
+	ground_aoe_controller.spawn_circle(v2(snap_jump_pos), JUMP_RADIUS,
 		JUMP_LIFETIME, JUMP_COLOR, [1, 1, "Darkest Dance (Oracle Jump)", [pc]])
 
 
@@ -462,12 +486,48 @@ func instantiate_party(new_party: Dictionary) -> void:
 	cw_light = randi() % 2 == 0
 
 
+# Variable names match the NA/EU role based setups.
+# For MUR, assume dps = LP1 and sup = LP2
 func party_setup() -> void:
+	var dps_adjust_prio: Array
+	var sup_adjust_prio: Array
+	var dps_keys: Array # LP1 keys for MUR
+	#var sup_keys: Array # LP2 keys for MUR
+	# Handle strat specific variables.
+	if strat == Strat.NAUR or strat == Strat.LPDU:
+		party_keys_sa = PARTY_SA_STATIC.duplicate()
+		dps_adjust_prio = DPS_ADJUST_PRIO_NA.duplicate()
+		sup_adjust_prio = SUP_ADJUST_PRIO_NA.duplicate()
+		dps_keys = Global.DPS_ROLE_KEYS
+	elif strat == Strat.MUR:
+		party_keys_sa = PARTY_SA_STATIC_MUR.duplicate()
+		dps_adjust_prio = DPS_ADJUST_PRIO_MUR.duplicate()
+		sup_adjust_prio = SUP_ADJUST_PRIO_MUR.duplicate()
+		dps_keys = DPS_ADJUST_PRIO_MUR
 	# Assign water debuffs
 	var debuff_lengths := [NONE, NONE, SHORT, SHORT, MED, MED, LONG, LONG]
 	var shuffle_list := party.keys()
 	assert(shuffle_list.size() == debuff_lengths.size(), "Array size mismatch.")
 	shuffle_list.shuffle()
+	
+	# User option to force swap. 
+	if Global.p3_apoc_force_swap:
+		var player_key = get_tree().get_first_node_in_group("player").get_role()
+		# We can ignore this if player is lowest swap prio.
+		if not (player_key == dps_adjust_prio.back() or player_key == sup_adjust_prio.back()):
+			# Get lowest swap prio key in player's group.
+			var low_prio_key = dps_adjust_prio.back() if dps_keys.has(player_key)\
+				else sup_adjust_prio.back()
+			var low_prio_index = shuffle_list.find(low_prio_key)
+			# Get char with same duration as player
+			var player_index := shuffle_list.find(player_key)
+			var match_index = player_index + 1 if player_index % 2 == 0\
+				else player_index - 1
+			# Swap match with low prio
+			var tmp = shuffle_list[match_index]
+			shuffle_list[match_index] = shuffle_list[low_prio_index]
+			shuffle_list[low_prio_index] = tmp
+	
 	# Used to find players by debuff duration.
 	var dps_debuff_lists := {NONE: [], SHORT: [], MED: [], LONG: []}
 	var sup_debuff_lists := {NONE: [], SHORT: [], MED: [], LONG: []}
@@ -476,14 +536,15 @@ func party_setup() -> void:
 		var duration = debuff_lengths[i]
 		party_keys_debuffs[key] = duration
 		# Populate lists
-		if Global.DPS_ROLE_KEYS.has(key):
+		if dps_keys.has(key):
 			dps_debuff_lists[duration].append(key)
 		else:
 			sup_debuff_lists[duration].append(key)
 		party_debuff_key_arr[duration].append(key)
+	
 	# Check if swaps are needed.
 	var adjusters := {"dps": [], "sup": []}  # [role][array of swappers]
-	# DPS
+	# DPS/LP1
 	for key in dps_debuff_lists:
 		if dps_debuff_lists[key].size() > 1:
 			# Find which dps adjusts
@@ -491,7 +552,7 @@ func party_setup() -> void:
 				adjusters["dps"].append(dps_debuff_lists[key][0])
 			else:
 				adjusters["dps"].append(dps_debuff_lists[key][1])
-	# Supports
+	# Supports/LP2
 	for key in sup_debuff_lists:
 		if sup_debuff_lists[key].size() > 1:
 			# Find which dps adjusts
@@ -499,11 +560,11 @@ func party_setup() -> void:
 				adjusters["sup"].append(sup_debuff_lists[key][0])
 			else:
 				adjusters["sup"].append(sup_debuff_lists[key][1])
-	# Handle swaps
+	# Handle swaps. If MUR, t2 is in dps adjust group (LP2).
 	assert(adjusters["dps"].size() == adjusters["sup"].size(), "Array size mismatch.")
 	if adjusters["sup"].has("t1"):
 		t1_swapped = true
-	if adjusters["sup"].has("t2"):
+	if adjusters["dps"].has("t2") or adjusters["sup"].has("t2"):
 		t2_swapped = true
 	while adjusters["dps"].size() > 0:
 		var dps_swap = adjusters["dps"].pop_front()
@@ -513,18 +574,20 @@ func party_setup() -> void:
 		party_keys_sa[sup_key] = dps_swap
 
 
-# Return CharacterBody given it's Apoc position key.
+# Return CharacterBody given its Apoc position key.
 func get_char(party_key) -> PlayableCharacter:
 	return party[party_key]
 
 
-# Return CharacterBody given it's Apoc position key.
+# Return CharacterBody given its Apoc position key.
 func get_char_sa(sa_key) -> PlayableCharacter:
 	return party[party_keys_sa[sa_key]]
 
 
-# Return CharacterBody given it's Apoc position key.
+# Return CharacterBody given its Apoc position key.
 func get_char_sa_static(sa_key) -> PlayableCharacter:
+	if strat == Strat.MUR:
+		return party[PARTY_SA_STATIC_MUR[sa_key]]
 	return party[PARTY_SA_STATIC[sa_key]]
 
 

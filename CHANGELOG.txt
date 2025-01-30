@@ -1,0 +1,12 @@
+# v1.5.4
+
+- DD: Added support for Mami (EU) and Vertical Spread (JP) strats. Needs testing.
+- DD: Bots will now always move towards mid while tank is baiting jump. Cleaned up tank movement.
+- P4: Increased size of Fragment of Fate hitbox. Need more research/vods showing the exact size of their hitbox.
+- CT: Adjusted post-rewind spread positions.
+- Apoc: Added option to force swap the player. It does so by giving them the same Water timer as the lowest adjust prio in their group.
+- Apoc: Fixed Darkest Dance AoE hit to snapshot on the farthest player's position at the end of the cast. Note that in game, this ability does not line up well with its animation. This change should better reflect its actual timing, but may still need some adjusting.
+- Apoc: Fixed bug where tank did not bait Darkest Dance out far enough.
+- Apoc: Increased Water AoE size.
+- UR: Added missing Return debuff, which should accurately count down until Rewind Stun is applied.
+- General: Fixed bug with players getting stuck after rewind or knockback.

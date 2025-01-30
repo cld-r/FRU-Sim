@@ -1,13 +1,22 @@
 # TODO:
 
 ### Critical:
-	- Clean up old Saved Variables.
-	- Fix deathwall.
+
+	- DD: Mami (EU) (https://raidplan.io/plan/scWeh81_SDmJyOsn)
+	- DD: Vertical (JP) spreads (https://ffxiv.tuufless.com/ultimates/fru/)
+
+### Other fixes:
+	- UR: Add missing rewind debuff timer (https://github.com/WCGH/FRU-Sim/issues/12)
+	- Apoc: Fix jump bait AoE snapshot. (https://github.com/WCGH/FRU-Sim/issues/9)
+	- Change default markers 1 to fit NAUR markers.
 
 ### General:
+	- Fix starting positions to match clocks.
+	- Fix debuff tooltips.
+	- Adde UI tooltips.
 	- Improve Waymark visuals.
-	- Add Nameplates.
 	- Add more movement abilities.
+	- Add distance checks for LR chains.
 
 ### UI:
 	- Add Moveable UI elements.
@@ -15,21 +24,20 @@
 	- Fix select buttons capturing right clicks.
 	- Fix dropdown menu errors.
 	- Add standard/legacy control options.
+	- Add Nameplates.
 
 ### Character Models:
 	- Fix sprint animation bug.
-	- Consolidate number of player models (combine tanks, healers, melee)
-
-### Main Menu:
-	- Improve/update for FRU.
+	- Consolidate or update player models (combine tanks, healers, melee)
 
 ### Modules:
 	- Pre-load shaders on first launch.
 
 ### P2 LR:
+	- Move tower soak position closer to edge, move to safe spot sooner.
 	- Add Locked Chains Icon/Debuff.
 	- Move non-tower soakers to their next safe spots earlier.
-	- Add real distance checking/chain assignment for start of LR.
+	- Add distance checking/chain assignment for start of LR.
 
 ### P3 UR:
 	- Add delay in fires moving out to avoid clipping lasers.
@@ -37,7 +45,11 @@
 	- Force free player after slide (player getting stuck).
 
 ### P3 Apoc:
-	- Add user option for forcing double swap.
+	- Add user option for forcing swap.
+
+### P4 CT:
+	- Move Dragon head hitbox even further ahead of sprite.
+	- Add wings out animation during knockbacks.
 
 ### Non-critical:
 	- Scrolling damage text.

@@ -1,10 +1,16 @@
+# Copyright 2025
+# All rights reserved.
+# This file is released under "GNU General Public License 3.0".
+# Please see the LICENSE file that should have been included as part of this package.
+
 extends Node
 
 var seq_scene_paths := {
-	0: "res://scenes/p2/p2_main.tscn",
-	1: "res://scenes/p3/p3_main.tscn",
+	0: "res://scenes/p2/p2_lr_main.tscn",
+	1: "res://scenes/p3/p3_ur_main.tscn",
 	2: "res://scenes/p3/p3_apoc_main.tscn",
-	3: "res://scenes/p4/p4_main.tscn"
+	3: "res://scenes/p4/p4_dd_main.tscn",
+	4: "res://scenes/p4/p4_ct_main.tscn"
 }
 
 

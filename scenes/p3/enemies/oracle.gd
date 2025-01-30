@@ -1,3 +1,8 @@
+# Copyright 2025
+# All rights reserved.
+# This file is released under "GNU General Public License 3.0".
+# Please see the LICENSE file that should have been included as part of this package.
+
 extends Node3D
 
 class_name Oracle
@@ -18,10 +23,9 @@ func play_ct_cast() -> void:
 	state_machine.travel("short_cast")
 
 
-# TODO: animate
 func play_hide() -> void:
-	self.visible = false
+	state_machine.travel("fade_out_idle")
 
 
 func play_show() -> void:
-	self.visible = true
+	state_machine.travel("fade_in_idle")

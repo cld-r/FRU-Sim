@@ -1,4 +1,4 @@
-# Copyright 2025 by William Craycroft
+# Copyright 2025
 # All rights reserved.
 # This file is released under "GNU General Public License 3.0".
 # Please see the LICENSE file that should have been included as part of this package.
@@ -23,7 +23,7 @@ const REPEAT_DELAY := 1.0
 @onready var timer: Timer = $Timer
 
 var relative_snapshot  # Laser target's snapshot position relative to the laser's global_position
-var laser_rotation := 0
+var laser_rotation := 0.0
 var hourglass_position: Vector2
 var rotate_delta: float
 

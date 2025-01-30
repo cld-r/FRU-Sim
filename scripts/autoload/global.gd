@@ -1,4 +1,4 @@
-# Copyright 2024 by William Craycroft
+# Copyright 2025
 # All rights reserved.
 # This file is released under "GNU General Public License 3.0".
 # Please see the LICENSE file that should have been included as part of this package.
@@ -15,6 +15,8 @@ const ALL_ROLES = SUPPORT + DPS
 const ROLE_GROUP_NAMES = {"Tank": TANKS, "Healer": HEALERS, "DPS": DPS}
 const ROLE_KEYS = ["t1", "t2", "h1", "h2", "m1", "m2", "r1", "r2"]
 const DPS_ROLE_KEYS = ["m1", "m2", "r1", "r2"]
+const TANK_ROLE_KEYS = ["t1", "t2"]
+const HEALER_ROLE_KEYS = ["h1", "h2"]
 const ROLE_NAMES = {"t1": TANKS[0], "t2": TANKS[1],
 	"h1": HEALERS[0], "h2": HEALERS[1],
 	"m1": MELEE[0], "m2": MELEE[1],
@@ -33,6 +35,11 @@ var p2_force_puddles := false
 
 # P3 Apoc
 var p3_t1_bait := false
+var p3_apoc_force_swap := false
+
+# P4 Darklit Dragonsong
+var p4_dd_solo_dance := false
+var p4_dd_force_tether := false
 
 # P3 Ultimate Relativity
 var p3_selected_debuff := 0  # [random, short, med, long]

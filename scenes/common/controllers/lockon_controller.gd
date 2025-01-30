@@ -1,4 +1,4 @@
-# Copyright 2024 by William Craycroft
+# Copyright 2025
 # All rights reserved.
 # This file is released under "GNU General Public License 3.0".
 # Please see the LICENSE file that should have been included as part of this package.
@@ -20,16 +20,16 @@ enum {PS_CROSS, PS_CIRCLE, PS_SQUARE, PS_TRIANGLE,
 	SPREAD_MARKER, GAZE, STACK_MARKER, CD_COG, SPREAD_MARKER_APOC}
 
 var res_paths := {
-	PS_CROSS: "res://scenes/common/player_characters/lockon/playstation/ps_cross.tscn",
-	PS_CIRCLE: "res://scenes/common/player_characters/lockon/playstation/ps_circle.tscn",
-	PS_SQUARE: "res://scenes/common/player_characters/lockon/playstation/ps_square.tscn",
-	PS_TRIANGLE: "res://scenes/common/player_characters/lockon/playstation/ps_triangle.tscn",
-	DEFAM: "res://scenes/common/player_characters/lockon/defam.tscn",
-	DIVEBOMB: "res://scenes/common/player_characters/lockon/divebomb.tscn",
-	DOOM: "res://scenes/common/player_characters/lockon/doom.tscn",
-	LC_1: "res://scenes/common/player_characters/lockon/limit_cut/lc_1.tscn",
-	LC_2: "res://scenes/common/player_characters/lockon/limit_cut/lc_2.tscn",
-	LC_3: "res://scenes/common/player_characters/lockon/limit_cut/lc_3.tscn",
+	PS_CROSS: "",
+	PS_CIRCLE: "",
+	PS_SQUARE: "",
+	PS_TRIANGLE: "",
+	DEFAM: "",
+	DIVEBOMB: "",
+	DOOM: "",
+	LC_1: "",
+	LC_2: "",
+	LC_3: "",
 	LR_ORB: "res://scenes/p2/lockon/lr_light_orb.tscn",
 	SPREAD_MARKER: "res://scenes/p2/lockon/spread_marker.tscn",
 	GAZE: "res://scenes/common/player_characters/lockon/gaze.tscn",
