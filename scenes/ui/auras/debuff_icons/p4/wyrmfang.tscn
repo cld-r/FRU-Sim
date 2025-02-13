@@ -5,6 +5,6 @@
 [node name="WyrmfangIcon" type="TextureRect"]
 size_flags_horizontal = 8
 size_flags_vertical = 8
-tooltip_text = "High Jump Target"
+tooltip_text = " Wyrmfang"
 texture = ExtResource("1_wl7pl")
 metadata/debuff_name = "wyrmfang"

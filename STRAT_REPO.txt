@@ -1,0 +1,7 @@
+## List of Strats resources for each Datacenter:
+
+# NAUR: https://pastebin.com/ue7w9jJH  ||  https://ultistrats.com/guides/fru/
+# LPDU: see Discord.
+# Elemental: https://pastebin.com/4UtwvXQu
+# Mana: https://ffxiv.tuufless.com/ultimates/fru/
+# MUR: https://materiaraiding.com/ultimate/fru

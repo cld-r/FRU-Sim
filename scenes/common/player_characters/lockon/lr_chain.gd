@@ -48,7 +48,7 @@ func set_variables(new_source, new_target, new_max_length, new_min_length, new_s
 	mesh.size.y = new_size
 
 
-func set_active(is_active: bool) -> void:
+func set_chain_active(is_active: bool) -> void:
 	chain_active = is_active
 
 

@@ -5,6 +5,6 @@
 [node name="LightsteepedIcon" type="TextureRect"]
 size_flags_horizontal = 8
 size_flags_vertical = 8
-tooltip_text = "High Jump Target"
+tooltip_text = "Lightsteeped"
 texture = ExtResource("1_ycs0b")
 metadata/debuff_name = "lightsteeped"

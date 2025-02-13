@@ -1,30 +1,17 @@
 # TODO:
 
 ### Critical:
-
-	- DD: Mami (EU) (https://raidplan.io/plan/scWeh81_SDmJyOsn)
-	- DD: Vertical (JP) spreads (https://ffxiv.tuufless.com/ultimates/fru/)
-	- DD/LR: Fix fail list bot name on Lightsteeped fail check.
-	- Apoc: Move snapshotted aoe earlier.
-
-### Other fixes:
-	- UR: Add missing rewind debuff timer (https://github.com/WCGH/FRU-Sim/issues/12)
-	- Apoc: Fix jump bait AoE snapshot. (https://github.com/WCGH/FRU-Sim/issues/9)
-	- Change default markers 1 to fit NAUR markers.
+	- Fix character not triggering grounded when jumping.
 
 ### General:
 	- Fix starting positions to match clocks.
-	- Fix debuff tooltips.
-	- Adde UI tooltips.
-	- Improve Waymark visuals.
+	- Add UI tooltips.
 	- Add more movement abilities.
-	- Add distance checks for LR chains.
 
 ### UI:
 	- Add Moveable UI elements.
 	- Improve party frame UI.
 	- Fix select buttons capturing right clicks.
-	- Fix dropdown menu errors.
 	- Add standard/legacy control options.
 	- Add Nameplates.
 
@@ -32,29 +19,21 @@
 	- Fix sprint animation bug.
 	- Consolidate or update player models (combine tanks, healers, melee)
 
-### Modules:
-	- Pre-load shaders on first launch.
-
 ### P2 LR:
+	- Chain break range accuracy.
 	- Move tower soak position closer to edge, move to safe spot sooner.
 	- Add Locked Chains Icon/Debuff.
 	- Move non-tower soakers to their next safe spots earlier.
-	- Add distance checking/chain assignment for start of LR.
+	- Add correct distance checking/chain assignment for start of LR.
 
 ### P3 UR:
-	- Add delay in fires moving out to avoid clipping lasers.
-	- Fix laser hitbox for jumping.
 	- Force free player after slide (player getting stuck).
 
 ### P3 Apoc:
-	- Add user option for forcing swap.
 
 ### P4 CT:
-	- Move Dragon head hitbox even further ahead of sprite.
-	- Add wings out animation during knockbacks.
 
 ### Non-critical:
 	- Scrolling damage text.
 	- Documentation.
-	- Minimap.
 	- Improve skybox.

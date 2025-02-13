@@ -5,6 +5,6 @@
 [node name="AeroIcon" type="TextureRect"]
 size_flags_horizontal = 8
 size_flags_vertical = 8
-tooltip_text = "High Jump Target"
+tooltip_text = "Spell-in-Waiting: Dark Aero III"
 texture = ExtResource("1_4arao")
 metadata/debuff_name = "aero"

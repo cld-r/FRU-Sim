@@ -1,4 +1,4 @@
-[gd_scene load_steps=52 format=3 uid="uid://72xsy2riqeef"]
+[gd_scene load_steps=53 format=3 uid="uid://72xsy2riqeef"]
 
 [ext_resource type="Script" path="res://scenes/p4/p4_dd_main.gd" id="1_8ujqk"]
 [ext_resource type="PackedScene" uid="uid://b23aj0fsxbgap" path="res://scenes/menus/control_menu.tscn" id="2_nk68u"]
@@ -30,12 +30,13 @@
 [ext_resource type="Script" path="res://scenes/p4/tether_check_button.gd" id="28_5ffe1"]
 [ext_resource type="PackedScene" uid="uid://jcbpndkhehjl" path="res://scenes/ui/coords.tscn" id="29_ofjjt"]
 [ext_resource type="Script" path="res://scenes/ui/role_select_button.gd" id="30_tsial"]
-[ext_resource type="Script" path="res://scenes/p4/solo_check_button.gd" id="31_muhxv"]
+[ext_resource type="Script" path="res://scenes/p4/spirit_check_button.gd" id="31_ohdfq"]
 [ext_resource type="PackedScene" uid="uid://ce72svh5khi1u" path="res://scenes/ui/sequence_select_button.tscn" id="32_3xvai"]
 [ext_resource type="Script" path="res://scenes/ui/spectate_button.gd" id="33_788op"]
 [ext_resource type="Script" path="res://scenes/p4/am_select_button.gd" id="33_yqvyr"]
 [ext_resource type="Script" path="res://scenes/p4/strat_select_button_dd.gd" id="34_c6fxa"]
 [ext_resource type="PackedScene" uid="uid://cmakti71sjg46" path="res://scenes/ui/info_box.tscn" id="34_j1suw"]
+[ext_resource type="Script" path="res://scenes/p4/dd_select_button.gd" id="35_kkb1i"]
 
 [sub_resource type="Animation" id="Animation_6yukl"]
 resource_name = "darklit"
@@ -482,6 +483,7 @@ offset_left = 150.0
 offset_top = 21.0
 offset_right = 327.0
 offset_bottom = 52.0
+tooltip_text = "Role Select"
 focus_mode = 0
 action_mode = 1
 button_mask = 3
@@ -510,32 +512,35 @@ anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -173.0
-offset_top = 87.0
-offset_right = -19.0
-offset_bottom = 118.0
-grow_horizontal = 0
-focus_mode = 0
-theme_override_constants/outline_size = 2
-button_mask = 3
-text = "Force Tethers"
-script = ExtResource("28_5ffe1")
-
-[node name="SoloCheckButton" type="CheckButton" parent="Buttons"]
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -175.0
 offset_top = 61.0
 offset_right = -19.0
 offset_bottom = 92.0
 grow_horizontal = 0
+tooltip_text = "Forces LR Tethers to be targetted on player."
 focus_mode = 0
 theme_override_constants/outline_size = 2
 button_mask = 3
-text = "T1 Solo Dance"
-script = ExtResource("31_muhxv")
+text = "Force Tether"
+script = ExtResource("28_5ffe1")
+
+[node name="SpiritCheckButton" type="CheckButton" parent="Buttons"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -173.0
+offset_top = 90.0
+offset_right = -19.0
+offset_bottom = 121.0
+grow_horizontal = 0
+tooltip_text = "Forces Sprit Taker (Jump) to target player."
+focus_mode = 0
+theme_override_constants/outline_size = 2
+button_mask = 3
+text = "Force Spirit"
+script = ExtResource("31_ohdfq")
 
 [node name="SequenceSelectButton" parent="Buttons" instance=ExtResource("32_3xvai")]
+tooltip_text = "Select Phase/Sequence."
 
 [node name="SpectateButton" type="CheckButton" parent="Buttons"]
 offset_left = 149.0
@@ -558,15 +563,19 @@ offset_top = 22.0
 offset_right = -361.0
 offset_bottom = 53.0
 grow_horizontal = 0
+tooltip_text = "4-4: North/South Light Parties.
+7-1: Party Mid, Solo Tank West."
 focus_mode = 0
 action_mode = 1
 button_mask = 3
 selected = 0
 fit_to_longest_item = false
-item_count = 2
+item_count = 3
 popup/item_0/text = "4-4"
-popup/item_1/text = "7-1"
+popup/item_1/text = "7-1 (T1)"
 popup/item_1/id = 1
+popup/item_2/text = "7-1 (T2)"
+popup/item_2/id = 2
 script = ExtResource("33_yqvyr")
 
 [node name="Label" type="Label" parent="Buttons/AMSelectButton"]
@@ -579,7 +588,42 @@ theme_override_font_sizes/font_size = 14
 text = "Akh Morn
 "
 
-[node name="StratSelectButton2" type="OptionButton" parent="Buttons"]
+[node name="DDSelectButton" type="OptionButton" parent="Buttons"]
+custom_minimum_size = Vector2(104.42, 0)
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -571.42
+offset_top = 22.0
+offset_right = -467.0
+offset_bottom = 53.0
+grow_horizontal = 0
+tooltip_text = "Share: T1 baits far jump, T2 baits close.
+Solo: Tank baits both jumps with invuln."
+focus_mode = 0
+action_mode = 1
+button_mask = 3
+selected = 0
+fit_to_longest_item = false
+item_count = 3
+popup/item_0/text = "Share"
+popup/item_1/text = "T1 Solo"
+popup/item_1/id = 1
+popup/item_2/text = "T2 Solo"
+popup/item_2/id = 2
+script = ExtResource("35_kkb1i")
+
+[node name="Label" type="Label" parent="Buttons/DDSelectButton"]
+layout_mode = 0
+offset_left = 3.835
+offset_top = -19.0
+offset_right = 100.835
+offset_bottom = 4.0
+theme_override_font_sizes/font_size = 14
+text = "Darkest Dance
+"
+
+[node name="StratSelectButton" type="OptionButton" parent="Buttons"]
 custom_minimum_size = Vector2(120, 0)
 anchors_preset = 1
 anchor_left = 1.0
@@ -589,20 +633,25 @@ offset_top = 22.0
 offset_right = -226.0
 offset_bottom = 53.0
 grow_horizontal = 0
+tooltip_text = "Select positioning strat."
 focus_mode = 0
 action_mode = 1
 button_mask = 3
 selected = 0
 fit_to_longest_item = false
-item_count = 3
+item_count = 5
 popup/item_0/text = "NAUR"
 popup/item_1/text = "Mami (EU)"
 popup/item_1/id = 1
 popup/item_2/text = "Vertical (JP)"
 popup/item_2/id = 2
+popup/item_3/text = "Mana"
+popup/item_3/id = 3
+popup/item_4/text = "MUR"
+popup/item_4/id = 4
 script = ExtResource("34_c6fxa")
 
-[node name="Label" type="Label" parent="Buttons/StratSelectButton2"]
+[node name="Label" type="Label" parent="Buttons/StratSelectButton"]
 layout_mode = 0
 offset_left = 6.835
 offset_top = -19.0
@@ -643,7 +692,8 @@ light_energy = 0.891
 [connection signal="pressed" from="Buttons/MainMenuButton" to="." method="_on_main_menu_button_pressed"]
 [connection signal="item_selected" from="Buttons/RoleSelectButton" to="Buttons/RoleSelectButton" method="_on_item_selected"]
 [connection signal="pressed" from="Buttons/TetherCheckButton" to="Buttons/TetherCheckButton" method="_on_pressed"]
-[connection signal="pressed" from="Buttons/SoloCheckButton" to="Buttons/SoloCheckButton" method="_on_pressed"]
+[connection signal="pressed" from="Buttons/SpiritCheckButton" to="Buttons/SpiritCheckButton" method="_on_pressed"]
 [connection signal="pressed" from="Buttons/SpectateButton" to="Buttons/SpectateButton" method="_on_pressed"]
 [connection signal="item_selected" from="Buttons/AMSelectButton" to="Buttons/AMSelectButton" method="_on_item_selected"]
-[connection signal="item_selected" from="Buttons/StratSelectButton2" to="Buttons/StratSelectButton2" method="_on_item_selected"]
+[connection signal="item_selected" from="Buttons/DDSelectButton" to="Buttons/DDSelectButton" method="_on_item_selected"]
+[connection signal="item_selected" from="Buttons/StratSelectButton" to="Buttons/StratSelectButton" method="_on_item_selected"]

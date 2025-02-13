@@ -5,6 +5,6 @@
 [node name="QuietusIcon" type="TextureRect"]
 size_flags_horizontal = 8
 size_flags_vertical = 8
-tooltip_text = "High Jump Target"
+tooltip_text = "Spell-in-Waiting: Quietus"
 texture = ExtResource("1_0t803")
 metadata/debuff_name = "quietus"

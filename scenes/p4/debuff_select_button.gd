@@ -7,8 +7,8 @@ extends OptionButton
 
 
 func _ready() -> void:
-	self.selected = Global.p4_selected_debuff
+	self.selected = Global.p4_ct_selected_debuff
 
 
 func _on_item_selected(index: int) -> void:
-	Global.p4_selected_debuff = index
+	Global.p4_ct_selected_debuff = index

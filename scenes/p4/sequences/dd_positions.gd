@@ -20,6 +20,9 @@ const SE := Vector2(-1, 1)
 const SW := Vector2(-1, -1)
 const MID := Vector2(0, 0)
 
+# Mana AM
+const MARKER_OFFSET := 19.0
+
 # Dodge towards LR Spots
 const AA_NS := Vector2(16.4, 10.1)
 const AA_EW := Vector2(10.1, 16.4)
@@ -63,10 +66,16 @@ const RS2 := Vector2(0.55, -0.78)
 const RS3 := Vector2(-0.2, 0.6)
 
 
-# Stack mid for AA baits
+# Stack mid for AA baits.
 const MID_STACK_PARTY := {
 	"t1": MID, "t2": MID + RS1, "h1": MID + RS2, "h2": MID + RS3,
 	"m1": MID - RS1, "m2": MID - RS2, "r1": MID - RS3, "r2": MID
+	}
+
+# Mana stacks North for AA baits.
+const MANA_STACK_PARTY := {
+	"t1": NW * MARKER_OFFSET, "t2": NE * MARKER_OFFSET + RS1, "h1": NE * MARKER_OFFSET + RS2, "h2": NE * MARKER_OFFSET + RS3,
+	"m1": NE * MARKER_OFFSET - RS1, "m2": NE * MARKER_OFFSET - RS2, "r1": NE * MARKER_OFFSET - RS3, "r2": NE * MARKER_OFFSET
 	}
 
 # Post AA spread, NA
@@ -90,6 +99,11 @@ const POST_AA_PARTY_JP := {
 	"m1": AA_EW * SE, "m2": AA_E * SE,
 	"r1": AA_E * NE, "r2": AA_EW * NE
 	}
+# MANA
+const POST_AA_PARTY_MANA := {
+	"t1": MID, "t2": MID + RS1, "h1": MID + RS2, "h2": MID + RS3,
+	"m1": MID - RS1, "m2": MID - RS2, "r1": MID - RS3, "r2": MID
+	}
 
 # Move to LR pre-pos, NA
 const LR_PARTY_NA := {
@@ -111,6 +125,13 @@ const LR_PARTY_JP := {
 	"h1": LR_JP * NW, "h2": LR_JP * NW + S_OFFSET,
 	"m1": LR_JP * NE + (S_OFFSET * 3), "m2": LR_JP * NE + (S_OFFSET * 2),
 	"r1": LR_JP * NE + S_OFFSET, "r2": LR_JP * NE
+	}
+# MANA
+const LR_PARTY_MANA := {
+	"t1": LR_NS * NE + S_OFFSET, "t2": LR_EW * NE + S_OFFSET,
+	"h1": LR_EW * NW + S_OFFSET, "h2": LR_NS * NW + S_OFFSET,
+	"m1": LR_EW * SW + S_OFFSET, "m2": LR_NS * SW + S_OFFSET,
+	"r1": LR_NS * SE + S_OFFSET, "r2": LR_EW * SE + S_OFFSET
 	}
 
 # Bowtie positions
@@ -187,8 +208,13 @@ const DANCE_SW_INTER_TANK := DANCE_INTER_TANK * SW
 const DANCE_E_TANK := DANCE_TANK * E
 const DANCE_W_TANK := DANCE_TANK * W
 
-# Akh Morn 7-1
-const AM_7_1_PARTY := {
+# Akh Morn 7-1 with T1 baiting.
+const AM_7_1_PARTY_T1 := {
+	"t1": AM_TANK, "t2": MID, "h1": MID + RS1, "h2": MID + RS2,
+	"m1": MID + RS3, "m2": MID - RS1, "r1": MID - RS2, "r2": MID - RS3
+}
+# Akh Morn 7-1 with T2 baiting.
+const AM_7_1_PARTY_T2 := {
 	"t1": MID, "t2": AM_TANK, "h1": MID + RS1, "h2": MID + RS2,
 	"m1": MID + RS3, "m2": MID - RS1, "r1": MID - RS2, "r2": MID - RS3
 }

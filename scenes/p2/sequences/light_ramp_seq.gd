@@ -13,8 +13,8 @@ const CHAINS = preload("res://scenes/ui/auras/debuff_icons/p2/chains.tscn")
 const LIGHTSTEEPED = preload("res://scenes/ui/auras/debuff_icons/p2/lightsteeped.tscn")
 const WEIGHT_OF_LIGHT = preload("res://scenes/ui/auras/debuff_icons/p2/weight_of_light.tscn")
 
-const CHAINS_MAX_DIST := 9999
-const CHAINS_MIN_DIST := 200
+const CHAINS_MAX_DIST := 100.0
+const CHAINS_MIN_DIST := 65.0
 const CHAINS_WIDTH := 0.15
 const LR_SOLO_TOWER_DURATION := 8.0
 const LIGHTSTEEPED_DURATION := 36.0
@@ -248,6 +248,7 @@ func towers_snapshot() -> void:
 		for pc: PlayableCharacter in tower.get_bodies():
 			pc.add_debuff(LIGHTSTEEPED, LIGHTSTEEPED_DURATION, true, "lightsteeped")
 		tower.queue_free()
+	lr_chains_controller.activate_chains()
 
 
 ## 20.00

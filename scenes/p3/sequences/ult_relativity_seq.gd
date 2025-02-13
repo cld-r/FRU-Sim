@@ -49,6 +49,7 @@ const SLIDE_TIME := 0.4
 @onready var special_markers: Node3D = %SpecialMarkers
 @onready var ground_markers: Node3D = %GroundMarkers
 @onready var fail_list: FailList = %FailList
+@onready var hide_bots_button: CheckButton = %HideBotsCheckButton
 
 var party: Dictionary
 var na_dps_prio := ["r2", "r1", "m1", "m2"]
@@ -106,7 +107,9 @@ func start_sequence(new_party: Dictionary) -> void:
 	assert(new_party != null, "Error. Where the party at?")
 	ground_aoe_controller.preload_aoe(["line", "circle", "donut"])
 	lockon_controller.pre_load([12])
+	on_toggle_bots_visible()
 	instantiate_party(new_party)
+	hide_bots_button.toggle_bots_visible.connect(on_toggle_bots_visible)
 	ult_relativity_anim.play("ult_relativity")
 
 
@@ -583,6 +586,15 @@ func move_party_ur_rotated(pos: Dictionary) -> void:
 		if pc.is_player() and !Global.spectate_mode:
 			continue
 		pc.move_to(pos[key].rotated(deg_to_rad(arena_rotation_deg)))
+
+
+func on_toggle_bots_visible() -> void:
+	var bots_visible = !Global.p3_ur_hide_bots
+	for key in party:
+		var pc: PlayableCharacter = party[key]
+		if pc.is_player():
+			continue
+		pc.visible = bots_visible
 
 
 func v2(vec3: Vector3) -> Vector2:

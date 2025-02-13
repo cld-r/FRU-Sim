@@ -5,6 +5,6 @@
 [node name="WyrmclawIcon" type="TextureRect"]
 size_flags_horizontal = 8
 size_flags_vertical = 8
-tooltip_text = "High Jump Target"
+tooltip_text = " Wyrmclaw"
 texture = ExtResource("1_qukmp")
 metadata/debuff_name = "wyrmclaw"

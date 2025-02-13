@@ -5,6 +5,6 @@
 [node name="DarkFireIcon" type="TextureRect"]
 size_flags_horizontal = 8
 size_flags_vertical = 8
-tooltip_text = "High Jump Target"
+tooltip_text = "Spell-in-Waiting: Dark Fire III"
 texture = ExtResource("1_eqmvd")
 metadata/debuff_name = "dark_fire"

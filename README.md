@@ -1,6 +1,6 @@
 # FRU-Sim
 
-This is a solo/offline sim for FRU. It is currently in development and has modules for Light Rampant, Ultimate Relativity, Sextuple Apocalypse, Darklit Dragonsong and Crystallize Time.
+This is a solo/offline sim for FRU. It is currently in development and has modules for Light Rampant, Ultimate Relativity, Sextuple Apocalypse, Darklit Dragonsong, Crystallize Time and Refulgent Blade.
 
 If you have any questions, feel free to join us on [Discord](https://discord.gg/P9adFHADrX).
 

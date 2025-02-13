@@ -13,6 +13,8 @@ const SPEED := 0.245
 var hit_count := 0
 
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
+@onready var puddle_drop: Node3D = %PuddleDrop
+
 
 var facing_direction: int
 var radius: float
@@ -63,7 +65,7 @@ func free_dragon():
 func _on_hitbox_body_entered(body: Node3D) -> void:
 	if !active:
 		return
-	collided_with_body.emit(self.global_position, body)
+	collided_with_body.emit(puddle_drop.global_position, body)
 	# Check if second hit.
 	hit_count += 1
 	if hit_count > 1:

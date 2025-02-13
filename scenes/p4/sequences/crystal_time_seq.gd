@@ -6,6 +6,7 @@
 extends Node
 
 enum Intercards {NW, NE, SE, SW}
+enum Strat {NA, MUR}
 
 # Debuff Icon Scenes
 const AERO_ICON = preload("res://scenes/ui/auras/debuff_icons/p4/aero.tscn")
@@ -17,6 +18,7 @@ const UNHOLY_DARKNESS_ICON = preload("res://scenes/ui/auras/debuff_icons/p3/unho
 const DARK_WATER_ICON = preload("res://scenes/ui/auras/debuff_icons/p3/dark_water_icon.tscn")
 const QUIETUS_ICON = preload("res://scenes/ui/auras/debuff_icons/p4/quietus_icon.tscn")
 const RETURN_ICON = preload("res://scenes/ui/auras/debuff_icons/p3/return_icon.tscn")
+const RETURN_ICON_2 = preload("res://scenes/ui/auras/debuff_icons/p3/return_icon_2.tscn")
 const STUN_ICON = preload("res://scenes/ui/auras/debuff_icons/common/stun_icon.tscn")
 const MAGIC_VULN_ICON = preload("res://scenes/ui/auras/debuff_icons/common/magic_vuln_icon.tscn")
 const REWIND_MARKER = preload("res://scenes/p3/arena/rewind_marker.tscn")
@@ -60,12 +62,14 @@ const STUN_DURATION := 9.0
 const REWIND_SLIDE_TIME := 0.5
 const WINGS_SLIDE_TIME := 0.7
 const MAGIC_VULN_DURATION := 6.0
+const REWIND_2_DURATION := 7.0
 const AKH_MORN_RADIUS := 12.0
 const AKH_MORN_LIFETIME := 0.3
 const AKH_MORN_LIGHT_COLOR := Color.GOLD
 const AKH_MORN_DARK_COLOR := Color.DARK_VIOLET
 
 const NA_WE_PRIO := ["h2", "h1", "t2", "t1", "m1", "m2", "r1", "r2"]
+const MUR_WE_PRIO := ["h1", "r1", "m1", "t1", "t2", "m2", "r2", "h2"]
 const DEBUFF_ASSIGNMENTS := {
 	"r_aero_sw": {AERO_ICON: 14, WYRMCLAW_ICON: 40, RETURN_ICON: 33},
 	"r_aero_se": {AERO_ICON: 14, WYRMCLAW_ICON: 40, RETURN_ICON: 33},
@@ -108,6 +112,7 @@ const ORACLE_POS := {
 @onready var exaline_ew: Exaline = %ExalineEW
 @onready var exaline_ns: Exaline = %ExalineNS
 @onready var line_scanner: LineScanner = %LineScanner
+@onready var hide_bots_button: CheckButton = %HideBotsCheckButton
 @onready var hourglasses := {
 	"n": %HourglassN, "nw": %HourglassNW, "ne": %HourglassNE,
 	"s": %HourglassS, "sw": %HourglassSW, "se": %HourglassSE, 
@@ -137,17 +142,30 @@ var scan_count := 0
 var ew_kb_targets := []
 var ns_kb_targets := []
 var puddles_positions: Dictionary
-
+var strat: Strat
+var aero_plant: bool
 
 func start_sequence(new_party: Dictionary) -> void:
 	assert(new_party != null, "Error. Where the party at?")
 	ground_aoe_controller.preload_aoe(["line", "circle", "donut"])
 	#lockon_controller.pre_load([13])
+	# Get Strat.
+	strat = SavedVariables.save_data["settings"]["p4_ct_strat"]
+	if strat is not int or strat >= Strat.size() or strat < 0:
+		# Fix invalid SavedVariables, defaults to NA.
+		GameEvents.emit_variable_saved("settings", "p4_ct_strat", 0)
+		strat = Strat.NA
+	# Apply user settings
+	aero_plant = SavedVariables.save_data["settings"]["p4_ct_aero_plant"]
+	on_toggle_bots_visible()
+	
 	instantiate_party(new_party)
 	# Connect signals
 	dragon_e.collided_with_body.connect(on_dragon_collision)
 	dragon_w.collided_with_body.connect(on_dragon_collision)
 	line_scanner.scan_finished.connect(on_scan_finished)
+	hide_bots_button.toggle_bots_visible.connect(on_toggle_bots_visible)
+	# Start animation sequence
 	crystal_time_anim.play("crystal_time")
 
 
@@ -215,9 +233,15 @@ func show_tethers() -> void:
 # Move to pre-hg positions
 func move_pre_hg():
 	if nw_tether:
-		move_party_ct(CTPos.PRE_HG_1_NW)
+		if aero_plant:
+			move_party_ct(CTPos.PRE_HG_1_NW_AEROS_PLANT)
+		else:
+			move_party_ct(CTPos.PRE_HG_1_NW)
 	else:
-		move_party_ct(CTPos.PRE_HG_1_NE)
+		if aero_plant:
+			move_party_ct(CTPos.PRE_HG_1_NE_AEROS_PLANT)
+		else:
+			move_party_ct(CTPos.PRE_HG_1_NE)
 
 ## 15.3
 # Start moving dragons
@@ -249,10 +273,26 @@ func hg_1_hit():
 ## 18.0
 # Move to post HG 1 positions
 func move_pre_aero():
-	if nw_tether:
-		move_party_ct(CTPos.POST_HG_1_NW)
+	if aero_plant:
+		# Calculate positions of the players getting knocked back relative to the current position of the aero player. 
+		var aero_target: Vector2
+		var positions := {}
+		
+		if nw_tether:
+			positions["r_aero_sw"] = CTPos.AERO_SOURCE * CTPos.SW # Aero not knocking back the party can move
+			aero_target = v2(get_char("r_aero_se").global_position) + CTPos.AERO_TARGET_OFFSET * CTPos.SE
+		else:
+			positions["r_aero_se"] = CTPos.AERO_SOURCE * CTPos.SE # Aero not knocking back the party can move
+			aero_target = v2(get_char("r_aero_sw").global_position) + CTPos.AERO_TARGET_OFFSET * CTPos.SW
+		positions["b_ice"] = aero_target + CTPos.RS1
+		positions["b_ud"] = aero_target + CTPos.RS2
+		positions["b_water"] = aero_target + CTPos.RS3
+		move_party_ct(positions)
 	else:
-		move_party_ct(CTPos.POST_HG_1_NE)
+		if nw_tether:
+			move_party_ct(CTPos.POST_HG_1_NW)
+		else:
+			move_party_ct(CTPos.POST_HG_1_NE)
 
 ## 18.7
 # Water hits.
@@ -488,6 +528,8 @@ func snapshot_rewinds():
 		new_marker.set_key(key)
 		new_marker.global_position = pos
 		rewind_ground_markers.append(new_marker)
+		# Add rewind debuff
+		get_char(key).add_debuff(RETURN_ICON_2, REWIND_2_DURATION)
 	# Tele Oracle middle.
 	oracle.global_position = ORACLE_POS["s"]
 	oracle.rotation.y = deg_to_rad(ORACLE_POS["s_rota"])
@@ -574,7 +616,7 @@ func clone_cast_wings():
 ## 43.4
 # Usurper jump towards rand target.
 func usurper_jump():
-	var target_pos := get_char(jump_target).global_position
+	var target_pos: Vector3 = party[jump_target].global_position
 	oracle.look_at(target_pos)
 	oracle.rotation.y += deg_to_rad(180.0)
 	var tween : Tween = get_tree().create_tween()
@@ -587,7 +629,7 @@ func usurper_jump():
 ## 44.0
 # Usurper aoe hit.
 func jump_hit():
-	var pc: PlayableCharacter = get_char(jump_target)
+	var pc: PlayableCharacter = party[jump_target]
 	ground_aoe_controller.spawn_circle(v2(pc.global_position), JUMP_RADIUS,
 		JUMP_LIFETIME, JUMP_COLOR, [1, 1, "Spirit Taker (Oracle Jump)", [pc]])
 
@@ -615,6 +657,12 @@ func slide_to_rewind():
 	move_usurper_ew()
 
 
+## 49.3
+# Play short wings animation
+func play_usurper_short():
+	usurper.play_short_cast()
+
+
 ## 49.9
 # Knockback 1
 func knockback_1_hit():
@@ -638,6 +686,9 @@ func knockback_1_hit():
 # Move Usurper to N/S kn spot.
 #func move_usurper_ns():
 
+
+## 53.9
+# Play short wings animation
 
 ## 54.5
 # Knockback 2
@@ -674,7 +725,13 @@ func unfreeze_player():
 ## 56.4
 # Move to Akh Morn positions
 func move_akh_morn():
-	move_party(party, CTPos.AKH_MORN)
+	var am_strat = SavedVariables.save_data["settings"]["p4_ct_am_strat"]
+	if am_strat == 0:
+		move_party(party, CTPos.AKH_MORN)
+	elif am_strat == 1:
+		move_party(party, CTPos.AKH_MORN_7_1_T1)
+	elif am_strat == 2:
+		move_party(party, CTPos.AKH_MORN_7_1_T2)
 
 
 ## 56.8
@@ -705,9 +762,9 @@ func cast_akh_morn():
 # Akh Morn hit
 func akh_morn_hit():
 	ground_aoe_controller.spawn_circle(v2(party["t1"].global_position),
-		AKH_MORN_RADIUS, AKH_MORN_LIFETIME, AKH_MORN_LIGHT_COLOR, [4, 4, "Akh Morn"])
+		AKH_MORN_RADIUS, AKH_MORN_LIFETIME, AKH_MORN_LIGHT_COLOR, [1, 7, "Akh Morn"])
 	ground_aoe_controller.spawn_circle(v2(party["t2"].global_position),
-		AKH_MORN_RADIUS, AKH_MORN_LIFETIME, AKH_MORN_DARK_COLOR, [4, 4, "Akh Morn"])
+		AKH_MORN_RADIUS, AKH_MORN_LIFETIME, AKH_MORN_DARK_COLOR, [1, 7, "Akh Morn"])
 
 
 ### END OF TIMELINE ###
@@ -753,8 +810,8 @@ func on_wyrm_debuff_timeout(player_key: String) -> void:
 func instantiate_party(new_party: Dictionary) -> void:
 	# Standard role keys
 	party = new_party
-	# NA Party setup
-	na_party_setup()
+	# NA/MUR Party setup
+	na_mur_party_setup()
 	# Randomize Tether spawn
 	nw_tether = randi() % 2 == 0
 	# Pick 3 Quietus targets
@@ -762,33 +819,42 @@ func instantiate_party(new_party: Dictionary) -> void:
 	for i in 3:
 		quietus_keys.append(pool_party.pop_at(randi_range(0, pool_party.size() - 1)))
 	# Pick Usurper Jump target
-	jump_target = party_ct.keys().pick_random()
+	if Global.p4_ct_force_spirit:
+		jump_target = get_tree().get_first_node_in_group("player").get_role()
+	else:
+		jump_target = NA_WE_PRIO.pick_random()
 	# Randomize Exaline spawns
 	exaline_spawns = randi_range(0, 3) as Intercards
 	east_exa = (exaline_spawns == Intercards.NE or exaline_spawns == Intercards.SE)
 	north_exa = (exaline_spawns == Intercards.NE or exaline_spawns == Intercards.NW)
 
 
-func na_party_setup() -> void:
+func na_mur_party_setup() -> void:
+	var we_prio
+	if strat == Strat.NA:
+		we_prio = NA_WE_PRIO
+	elif strat == Strat.MUR:
+		we_prio = MUR_WE_PRIO
+	
 	# Shuffle dps/sup roles
 	var shuffle_list := party.keys()
 	shuffle_list.shuffle()
 	
 	# Handle manual debuff selection from user.
-	if Global.p4_selected_debuff != 0:
+	if Global.p4_ct_selected_debuff != 0:
 		var player_role_key = get_tree().get_first_node_in_group("player").get_role()
 		# Remove player index and insert at selected key
 		shuffle_list.erase(player_role_key)
 		# For DPS need to convert 1,2,3 index to 3,2,1
-		shuffle_list.insert(Global.p4_selected_debuff - 1, player_role_key)
+		shuffle_list.insert(Global.p4_ct_selected_debuff - 1, player_role_key)
 	
 	# Check if red/aero (0, 6) are in prio order, otherwise swap them.
-	if NA_WE_PRIO.find(shuffle_list[0]) > NA_WE_PRIO.find(shuffle_list[6]):
+	if we_prio.find(shuffle_list[0]) > we_prio.find(shuffle_list[6]):
 		var temp = shuffle_list[0]
 		shuffle_list[0] = shuffle_list[6]
 		shuffle_list[6] = temp
 	# Check if red/ice (1, 7) are in prio order, otherwise swap them.
-	if NA_WE_PRIO.find(shuffle_list[1]) > NA_WE_PRIO.find(shuffle_list[7]):
+	if we_prio.find(shuffle_list[1]) > we_prio.find(shuffle_list[7]):
 		var temp = shuffle_list[1]
 		shuffle_list[1] = shuffle_list[7]
 		shuffle_list[7] = temp
@@ -842,6 +908,15 @@ func _on_area_3d_area_entered(area: Area3D) -> void:
 		if area.spell_name == "" or area.spell_name == "Maelstrom (Hourglass AoE)":
 			return
 		fail_list.add_fail("Fragment of Fate was hit by %s." % area.spell_name)
+
+
+func on_toggle_bots_visible() -> void:
+	var bots_visible = !Global.p4_ct_hide_bots
+	for key in party:
+		var pc: PlayableCharacter = party[key]
+		if pc.is_player():
+			continue
+		pc.visible = bots_visible
 
 
 func v2(vec3: Vector3) -> Vector2:

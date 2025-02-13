@@ -18,3 +18,17 @@
 - LR: Added Mana DC positioning (Credit to WaterBoiledPizza). Will add waymark preset for Mana later.
 - General: Added Reset keybind ('R' by default).
 - General: Debuff timers should now appear and expire more accurately.
+
+# v1.6.1
+- DD: Added support for Mana and MUR Strats (Credit to WaterBoiledPizza and Ducky).
+- DD: Added more options for Darkest Dance and Akh Morn tank assignments.
+- DD+LR: Added fail condition for stretching chains too close or too far.
+- DD+CT: Added option to force Spirit Taker jump on player.
+- CT: Reduced size of the Dragon Head's hitbox and moved it farther in front of the model. This may need further tweaking but the goal is to replicate the jankiness of soaking these in game.
+- CT: Added support for MUR lineup prio and Aeros Plant option (Credit to Ducky).
+- CT: Added 7-1 Akh Morn option.
+- CT+UR: Added option to hide bots.
+- CT: Added missing Rewind debuff.
+- CT: Fixed issue where M1 was baiting Spirit Jump too close to the Fragment.
+- General: Improved waymark visual (Credit to WorstAquaPlayer)
+- General: Fixed most debuff icon tooltips.

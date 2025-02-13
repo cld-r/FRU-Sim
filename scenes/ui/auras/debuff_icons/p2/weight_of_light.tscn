@@ -5,6 +5,6 @@
 [node name="WeightOfLightIcon" type="TextureRect"]
 size_flags_horizontal = 8
 size_flags_vertical = 8
-tooltip_text = "High Jump Target"
+tooltip_text = "The Weight of Light"
 texture = ExtResource("1_qk7ql")
 metadata/debuff_name = "weight_of_light"

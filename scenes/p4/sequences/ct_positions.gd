@@ -20,9 +20,11 @@ const SE := Vector2(-1, 1)
 const SW := Vector2(-1, -1)
 
 const FIRST_HG_DODGE :=  Vector2(36.3, 28.4)
+const FIRST_HG_DODGE_AEROS_PLANT :=  Vector2(34.3, 29.4)
 const INTER_STACK := Vector2(30.8, 30.8)
-const AERO_TARGET := Vector2(35.9, 20.3)
+#const AERO_TARGET := Vector2(35.9, 20.3)
 const AERO_SOURCE := Vector2(39.6, 22.8)
+const AERO_TARGET_OFFSET := Vector2(-3.7, -2.5)
 const EARLY_SOAK := Vector2(24.2, 16.77)
 const NS_EXA_DODGE := Vector2(38.9, 4.0)
 const POST_EXA := Vector2(27.1, 19.1)
@@ -57,8 +59,8 @@ const T1_SPREAD_NE := Vector2(37.3, 24.1)
 const T2_SPREAD_NE := Vector2(18, 40)
 const H1_SPREAD_NE := Vector2(14.1, 0)
 const H2_SPREAD_NE := Vector2(0, 14.1)
-const M1_SPREAD_NE := Vector2(7.3, -19.5)
-const M2_SPREAD_NE := Vector2(-19.5, 7.3)
+const M1_SPREAD_NE := Vector2(0, -14)
+const M2_SPREAD_NE := Vector2(-14, 0)
 const R1_SPREAD_NE := Vector2(29, -29)
 const R2_SPREAD_NE := Vector2(-29, 29)
 
@@ -66,14 +68,17 @@ const T1_SPREAD_NW := Vector2(18, -40)
 const T2_SPREAD_NW := Vector2(37.3, -24.1)
 const H1_SPREAD_NW := Vector2(0, -14.1)
 const H2_SPREAD_NW := Vector2(14.1, 0)
-const M1_SPREAD_NW := Vector2(-19.5, -7.3)
-const M2_SPREAD_NW := Vector2(7.3, 19.5)
+const M1_SPREAD_NW := Vector2(-14, 0)
+const M2_SPREAD_NW := Vector2(0, 14)
 const R1_SPREAD_NW := Vector2(-29, -29)
 const R2_SPREAD_NW := Vector2(29, 29)
 
 # Akh Morn
 const AM_STACK_LEFT := Vector2(8, 0)
 const AM_STACK_RIGHT := Vector2(-8, 0)
+# Akh Morn 7-1
+const AM_TANK := Vector2(0, -22)
+const MID := Vector2(0, 0)
 
 # 'Random' spread values so bots aren't stacked
 const RS1 := Vector2(0.3, 0.2)
@@ -95,15 +100,33 @@ const PRE_HG_1_NE := {
 	"b_ud": FIRST_HG_DODGE * SW + RS2, "b_water": FIRST_HG_DODGE * SW + RS3
 }
 
+# Variant where aeros plant. Aero knocking back party gets very close to HG, party stacks next to them. 
+const PRE_HG_1_NW_AEROS_PLANT := {
+	"r_aero_sw": FIRST_HG_DODGE * SW, "r_aero_se": FIRST_HG_DODGE * SE,
+	"r_ice_w": Vector2(0, -30), "r_ice_e": Vector2(0, 30),
+	"b_erupt": FIRST_HG_DODGE * NW, "b_ice": FIRST_HG_DODGE_AEROS_PLANT * SE + RS1,
+	"b_ud": FIRST_HG_DODGE_AEROS_PLANT * SE + RS2, "b_water": FIRST_HG_DODGE_AEROS_PLANT * SE + RS3
+}
+
+const PRE_HG_1_NE_AEROS_PLANT := {
+	"r_aero_sw": FIRST_HG_DODGE * SW, "r_aero_se": FIRST_HG_DODGE * SE,
+	"r_ice_w": Vector2(0, -30), "r_ice_e": Vector2(0, 30),
+	"b_erupt": FIRST_HG_DODGE * NE, "b_ice": FIRST_HG_DODGE_AEROS_PLANT * SW + RS1,
+	"b_ud": FIRST_HG_DODGE_AEROS_PLANT * SW + RS2, "b_water": FIRST_HG_DODGE_AEROS_PLANT * SW + RS3
+}
 
 # Aero's and blues move into hg
 const POST_HG_1_NW := {
 	"r_aero_sw": AERO_SOURCE * SW, "r_aero_se": AERO_SOURCE * SE,
-	"b_ice": AERO_TARGET * SE + RS1, "b_ud": AERO_TARGET * SE + RS2, "b_water": AERO_TARGET * SE + RS3
+	"b_ice": (AERO_SOURCE + AERO_TARGET_OFFSET) * SE + RS1,
+	"b_ud": (AERO_SOURCE + AERO_TARGET_OFFSET) * SE + RS2,
+	"b_water": (AERO_SOURCE + AERO_TARGET_OFFSET) * SE + RS3
 }
 const POST_HG_1_NE := {
 	"r_aero_sw": AERO_SOURCE * SW, "r_aero_se": AERO_SOURCE * SE,
-	"b_ice": AERO_TARGET * SW + RS1, "b_ud": AERO_TARGET * SW + RS2, "b_water": AERO_TARGET * SW + RS3
+	"b_ice": (AERO_SOURCE + AERO_TARGET_OFFSET) * SW + RS1, 
+	"b_ud": (AERO_SOURCE + AERO_TARGET_OFFSET) * SW + RS2, 
+	"b_water": (AERO_SOURCE + AERO_TARGET_OFFSET) * SW + RS3
 }
 
 # E/W Reds step out to avoid soaking their own puddles.
@@ -310,4 +333,15 @@ const AKH_MORN := {
 	"m1": AM_STACK_LEFT + RS1, "m2": AM_STACK_RIGHT + RS1, 
 	"r1": AM_STACK_LEFT + RS2, "r2": AM_STACK_RIGHT + RS2, 
 	"h1": AM_STACK_LEFT + RS3, "h2": AM_STACK_RIGHT + RS3
+}
+
+# Akh Morn 7-1 with T1 baiting.
+const AKH_MORN_7_1_T1 := {
+	"t1": AM_TANK, "t2": MID, "h1": MID + RS1, "h2": MID + RS2,
+	"m1": MID + RS3, "m2": MID - RS1, "r1": MID - RS2, "r2": MID - RS3
+}
+# Akh Morn 7-1 with T2 baiting.
+const AKH_MORN_7_1_T2 := {
+	"t1": MID, "t2": AM_TANK, "h1": MID + RS1, "h2": MID + RS2,
+	"m1": MID + RS3, "m2": MID - RS1, "r1": MID - RS2, "r2": MID - RS3
 }

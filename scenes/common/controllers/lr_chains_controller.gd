@@ -11,10 +11,11 @@ const CHAIN_WIDTH := 0.15
 var chain_path := "res://scenes/common/player_characters/lockon/lr_chain.tscn"
 var chain_scene : PackedScene
 var active_chains : Array
-
+var fail_list: FailList
 
 func preload_resources() -> void:
 	ResourceLoader.load_threaded_request(chain_path, "PackedScene")
+	fail_list = get_tree().get_first_node_in_group("fail_list")
 
 
 # Can connect to LRChain chain_stretched signal for fail condition
@@ -28,6 +29,7 @@ func spawn_chain(source: Node3D, target: Node3D, max_length: float = 9999,
 	new_chain.active = true
 	source.add_child(new_chain)
 	active_chains.append(new_chain)
+	new_chain.chain_stretched.connect(on_chain_stretched)
 	return new_chain
 
 
@@ -47,4 +49,11 @@ func remove_all_chains() -> void:
 
 func activate_chains() -> void:
 	for chain: LRChain in active_chains:
-		chain.set_active(true)
+		chain.set_chain_active(true)
+
+
+func on_chain_stretched(_target, _source) -> void:
+	if !fail_list:
+		fail_list = get_tree().get_first_node_in_group("fail_list")
+	fail_list.add_fail("Light Rampant Chain Broke.")
+	remove_all_chains()

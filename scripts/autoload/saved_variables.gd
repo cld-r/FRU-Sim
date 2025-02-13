@@ -24,9 +24,13 @@ var save_data: Dictionary = {
 		"p2_lr_strat": 0,  # [NAUR, LPDU]
 		"p3_sa_strat": 0,  # [NAUR, LPDU]
 		"p3_sa_swap": 0,   # [Freepoc, Permaswap]
-		"p3_ur_strat": 0,   # [NAUR, LPDU]
-		"p4_dd_strat": 0,  # [NA, EU, JP]
-		"p4_dd_am_strat": 0  # [4-4, 7-1]
+		"p3_ur_strat": 0,  # [NAUR, LPDU]
+		"p4_dd_strat": 0,  # [NA, EU, JP, Mana, MUR]
+		"p4_dd_am_strat": 0,    # [4-4, 7-1 (T1), 7-1 (T2)]
+		"p4_dd_dance_strat": 0, # [Share, Solo (T1), Solo (T2)
+		"p4_ct_strat": 0,  # [NA, MUR]
+		"p4_ct_am_strat": 0,    # [4-4, 7-1 (T1), 7-1 (T2)]
+		"p4_ct_aero_plant": false
 	},
 	"keybinds": {
 		"ab1_sprint": KEY_1,

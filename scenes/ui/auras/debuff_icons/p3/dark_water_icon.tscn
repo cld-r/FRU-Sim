@@ -5,6 +5,6 @@
 [node name="DarkWaterIcon" type="TextureRect"]
 size_flags_horizontal = 8
 size_flags_vertical = 8
-tooltip_text = "High Jump Target"
+tooltip_text = "Spell-in-Waiting: Dark Water III"
 texture = ExtResource("1_uh7by")
 metadata/debuff_name = "dark_water"
