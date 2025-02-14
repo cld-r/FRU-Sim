@@ -77,13 +77,27 @@ const R2_SPREAD_NW := Vector2(29, 29)
 const AM_STACK_LEFT := Vector2(8, 0)
 const AM_STACK_RIGHT := Vector2(-8, 0)
 # Akh Morn 7-1
-const AM_TANK := Vector2(0, -22)
+const AM_TANK := Vector2(-16, 0)
 const MID := Vector2(0, 0)
 
 # 'Random' spread values so bots aren't stacked
 const RS1 := Vector2(0.3, 0.2)
 const RS2 := Vector2(0.15, -0.28)
 const RS3 := Vector2(-0.2, 0.1)
+
+# Conga Positions
+const CONGA := {
+	"t1": Vector2(-15, -2.5), "t2": Vector2(-15, 2.5),
+	"h1": Vector2(-15, -17.5), "h2": Vector2(-15, 17.5), 
+	"m1": Vector2(-15, -7.5), "m2": Vector2(-15, 7.5),
+	"r1": Vector2(-15, -12.5), "r2": Vector2(-15, 12.5)
+}
+
+# Red debuffs move
+const RED_DEBUFFS := {
+	"r_aero_sw": Vector2(-22.5, -7.5), "r_aero_se": Vector2(-22.5, 7.5),
+	"r_ice_w": Vector2(-7.5, -7.5), "r_ice_e": Vector2(-7.5, 7.5)
+}
 
 # NW Tether first move
 const PRE_HG_1_NW := {

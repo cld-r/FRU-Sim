@@ -181,6 +181,7 @@ func hands_in_cast() -> void:
 # Start Crystallize Time Cast (4.5s, accelerated)
 func start_ct_cast() -> void:
 	cast_bar.cast("Crystallize Time", 4.5)
+	move_party(party, CTPos.CONGA)
 
 
 ## 5.4
@@ -208,6 +209,10 @@ func assign_debuffs() -> void:
 	for key in hourglasses:
 		hourglasses[key].show_hourglass()
 
+## 7.5
+# Red debuffs move
+func red_debuffs_move() -> void:
+	move_party_ct(CTPos.RED_DEBUFFS)
 
 ## 10.0
 # Show tethers and dragons
